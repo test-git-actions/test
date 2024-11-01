@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci:
-    uses: "test-1/.github/workflows/blank.yml@fcd2b98bd1dcabaf55a5020d5c7888a0a39d77e7"
+    uses: "test-git-actions/test-1/.github/workflows/blank.yml@fcd2b98bd1dcabaf55a5020d5c7888a0a39d77e7"
     secrets: inherit
     with:
       version: "fcd2b98bd1dcabaf55a5020d5c7888a0a39d77e7"
