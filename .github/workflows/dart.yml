@@ -8,9 +8,9 @@ on:
 
 jobs:
   ci:
-    uses: "MGMResorts/mgm-af-ci-workflows/.github/workflows/reusable-ci.yml@5655816bc3dcef603a4328cff0cbe09b2d4ea0b1"
+    uses: "MGMResorts/mgm-af-ci-workflows/.github/workflows/reusable-ci.yml@00cb30d0f29014df88bab02cbe8bb9dd61d7d402"
     secrets: inherit
     with:
-      version: "5655816bc3dcef603a4328cff0cbe09b2d4ea0b1"
+      version: "00cb30d0f29014df88bab02cbe8bb9dd61d7d402"
       flutter_version: "3.0.2"
       flutter_channel: "stable"
