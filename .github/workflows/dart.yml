@@ -11,7 +11,6 @@ jobs:
     uses: "test-git-actions/test-1/.github/workflows/reusable.yml@cab44fc2c08445eba93d27606199c3a4b19f4ab8"
     secrets: inherit
     with:
-      version: "cab44fc2c08445eba93d27606199c3a4b19f4ab8"
       flutter_version: "3.0.2"
       flutter_channel: "stable"
       projectType: "flutter"
