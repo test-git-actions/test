@@ -1,0 +1,16 @@
+name: Continuous Integration (af)
+run-name: "(CI) - ${{ github.event.head_commit.message }}"
+
+on:
+  push:
+    branches:
+      - "SSDLC-mgm_analytics"
+
+jobs:
+  ci:
+    uses: "MGMResorts/mgm-af-ci-workflows/.github/workflows/reusable-ci.yml@5655816bc3dcef603a4328cff0cbe09b2d4ea0b1"
+    secrets: inherit
+    with:
+      version: "5655816bc3dcef603a4328cff0cbe09b2d4ea0b1"
+      flutter_version: "3.0.2"
+      flutter_channel: "stable"
