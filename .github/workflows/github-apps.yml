@@ -60,7 +60,7 @@ jobs:
                       const installations = response.data;
                       console.log(\`==================================================\`, installations);
                       console.log(\`Installed applications in organization '\${SOURCE_ORG}':\`);
-                      installations.forEach((installation) => {
+                      installations.map((installation) => {
                           console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);
                       });
                       console.log(\`==================================================\`);
