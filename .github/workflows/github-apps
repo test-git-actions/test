@@ -1,0 +1,66 @@
+name: Get GitHub App Installations
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_org:
+        description: 'Enter the GitHub organization name'
+        required: true
+        default: 'test-git-actions'
+      github_token:
+        description: 'Enter your GitHub token'
+        required: true
+        default: ''
+
+jobs:
+  fetch-installations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install axios
+
+      - name: Fetch GitHub App installations
+        env:
+          SOURCE_ORG: ${{ inputs.source_org }}
+          GITHUB_TOKEN: ${{ inputs.github_token }}
+        run: |
+          echo "const axios = require('axios');" > getInstallations.js
+          echo "const SOURCE_ORG = process.env.SOURCE_ORG;" >> getInstallations.js
+          echo "const GITHUB_TOKEN = process.env.GITHUB_TOKEN;" >> getInstallations.js
+          echo "const API_URL_SOURCE = \`https://api.github.com/orgs/\${SOURCE_ORG}/installations\`;" >> getInstallations.js
+          echo "const getGitHubAppInstallations = async () => {" >> getInstallations.js
+          echo "    try {" >> getInstallations.js
+          echo "        console.log(\`Fetching GitHub App installations for organization '\${SOURCE_ORG}'...\`);" >> getInstallations.js
+          echo "        const response = await axios.get(API_URL_SOURCE, {" >> getInstallations.js
+          echo "            headers: {" >> getInstallations.js
+          echo "                Authorization: \`Bearer \${GITHUB_TOKEN}\`," >> getInstallations.js
+          echo "                Accept: 'application/vnd.github.v3+json'," >> getInstallations.js
+          echo "            }," >> getInstallations.js
+          echo "        });" >> getInstallations.js
+          echo "        if (response.status === 200) {" >> getInstallations.js
+          echo "            const installations = response.data.installations;" >> getInstallations.js
+          echo "            console.log(\`==================================================\`);" >> getInstallations.js
+          echo "            console.log(\`Installed applications in organization '\${SOURCE_ORG}':\`);" >> getInstallations.js
+          echo "            installations.forEach((installation) => {" >> getInstallations.js
+          echo "                console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);" >> getInstallations.js
+          echo "            });" >> getInstallations.js
+          echo "            console.log(\`==================================================\`);" >> getInstallations.js
+          echo "            return installations;" >> getInstallations.js
+          echo "        } else {" >> getInstallations.js
+          echo "            console.log(\`Failed to fetch GitHub App installations: \${response.status}\`);" >> getInstallations.js
+          echo "            return null;" >> getInstallations.js
+          echo "        }" >> getInstallations.js
+          echo "    } catch (error) {" >> getInstallations.js
+          echo "        console.error('Error fetching GitHub App installations:', error.response ? error.response.data : error.message);" >> getInstallations.js
+          echo "        throw new Error(error.message);" >> getInstallations.js
+          echo "    }" >> getInstallations.js
+          echo "};" >> getInstallations.js
+          node getInstallations.js
