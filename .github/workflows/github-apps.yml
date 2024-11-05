@@ -47,7 +47,6 @@ jobs:
               try {
                   console.log(\`Fetching GitHub App installations for organization '\${SOURCE_ORG}'...\`);
                   console.log('API URL:', API_URL_SOURCE);
-                  console.log('Authorization header:', \`Bearer \${GITHUB_TOKEN}\`);
 
                   const response = await axios.get(API_URL_SOURCE, {
                       headers: {
@@ -56,16 +55,21 @@ jobs:
                       },
                   });
 
-                  if (response.status === 200) {
-                      const installations = response.data;
-                      console.log(\`==================================================\`, installations);
+                  console.log('Full response data:', response.data);
+
+                  // Ensure response.data is an array or has installations array
+                  const installations = Array.isArray(response.data) ? response.data : response.data.installations;
+
+                  if (Array.isArray(installations)) {
+                      console.log(\`==================================================\`);
                       console.log(\`Installed applications in organization '\${SOURCE_ORG}':\`);
-                      installations.map((installation) => {
+                      installations.forEach((installation) => {
                           console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);
                       });
                       console.log(\`==================================================\`);
                   } else {
-                      console.log(\`Failed to fetch GitHub App installations: \${response.status}\`);
+                      console.log('Error: Expected installations to be an array.');
+                      console.log('Received data:', installations);
                   }
               } catch (error) {
                   console.error('Error fetching GitHub App installations:', error.response ? error.response.data : error.message);
