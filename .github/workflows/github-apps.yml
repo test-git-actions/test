@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Log input variables
+        run: |
+          echo "Source Organization: ${{ github.event.inputs.source_org }}"
+          echo "GitHub Token: ${{ github.event.inputs.github_token }}"
+
       - name: Install dependencies
         run: npm install axios
 
@@ -32,10 +37,13 @@ jobs:
           SOURCE_ORG: ${{ github.event.inputs.source_org }}
           GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
         run: |
+          echo "Creating the script to fetch GitHub App installations..."
+
           echo "const axios = require('axios');" > getInstallations.js
           echo "const SOURCE_ORG = process.env.SOURCE_ORG;" >> getInstallations.js
           echo "const GITHUB_TOKEN = process.env.GITHUB_TOKEN;" >> getInstallations.js
           echo "const API_URL_SOURCE = \`https://api.github.com/orgs/\${SOURCE_ORG}/installations\`;" >> getInstallations.js
+
           echo "const getGitHubAppInstallations = async () => {" >> getInstallations.js
           echo "    try {" >> getInstallations.js
           echo "        console.log(\`Fetching GitHub App installations for organization '\${SOURCE_ORG}'...\`);" >> getInstallations.js
@@ -45,6 +53,10 @@ jobs:
           echo "                Accept: 'application/vnd.github.v3+json'," >> getInstallations.js
           echo "            }," >> getInstallations.js
           echo "        });" >> getInstallations.js
+
+          echo "        console.log('API URL:', API_URL_SOURCE);" >> getInstallations.js
+          echo "        console.log('Authorization header:', \`Bearer \${GITHUB_TOKEN}\`);" >> getInstallations.js
+
           echo "        if (response.status === 200) {" >> getInstallations.js
           echo "            const installations = response.data;" >> getInstallations.js
           echo "            console.log(\`==================================================\`);" >> getInstallations.js
@@ -63,4 +75,6 @@ jobs:
           echo "        throw new Error(error.message);" >> getInstallations.js
           echo "    }" >> getInstallations.js
           echo "}; getGitHubAppInstallations();" >> getInstallations.js
+
+          echo "Running the script..."
           node getInstallations.js
