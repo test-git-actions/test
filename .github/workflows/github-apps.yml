@@ -29,8 +29,8 @@ jobs:
 
       - name: Fetch GitHub App installations
         env:
-          SOURCE_ORG: ${{ inputs.source_org }}
-          GITHUB_TOKEN: ${{ inputs.github_token }}
+          SOURCE_ORG: ${{ github.event.inputs.source_org }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
         run: |
           echo "const axios = require('axios');" > getInstallations.js
           echo "const SOURCE_ORG = process.env.SOURCE_ORG;" >> getInstallations.js
@@ -46,7 +46,7 @@ jobs:
           echo "            }," >> getInstallations.js
           echo "        });" >> getInstallations.js
           echo "        if (response.status === 200) {" >> getInstallations.js
-          echo "            const installations = response.data.installations;" >> getInstallations.js
+          echo "            const installations = response.data;" >> getInstallations.js
           echo "            console.log(\`==================================================\`);" >> getInstallations.js
           echo "            console.log(\`Installed applications in organization '\${SOURCE_ORG}':\`);" >> getInstallations.js
           echo "            installations.forEach((installation) => {" >> getInstallations.js
@@ -62,5 +62,5 @@ jobs:
           echo "        console.error('Error fetching GitHub App installations:', error.response ? error.response.data : error.message);" >> getInstallations.js
           echo "        throw new Error(error.message);" >> getInstallations.js
           echo "    }" >> getInstallations.js
-          echo "};" >> getInstallations.js
+          echo "}; getGitHubAppInstallations();" >> getInstallations.js
           node getInstallations.js
