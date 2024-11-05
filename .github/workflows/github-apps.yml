@@ -1,4 +1,4 @@
-name: Get GitHub App Installations
+name: Get GitHub App Installations and Repositories
 
 on:
   workflow_dispatch:
@@ -12,8 +12,13 @@ on:
         required: true
         default: ''
 
+env:
+  BASE_GITHUB_API_URL: "https://api.github.com"
+  INSTALLATIONS_ENDPOINT: "/orgs/${{ github.event.inputs.source_org }}/installations"
+  REPOS_ENDPOINT: "/orgs/${{ github.event.inputs.source_org }}/repos"
+
 jobs:
-  fetch-installations:
+  fetch-data:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,49 +37,54 @@ jobs:
       - name: Install dependencies
         run: npm install axios
 
-      - name: Fetch GitHub App installations
+      - name: Fetch GitHub App installations and repositories
         env:
           SOURCE_ORG: ${{ github.event.inputs.source_org }}
           GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
+          BASE_GITHUB_API_URL: ${{ env.BASE_GITHUB_API_URL }}
+          INSTALLATIONS_ENDPOINT: ${{ env.INSTALLATIONS_ENDPOINT }}
+          REPOS_ENDPOINT: ${{ env.REPOS_ENDPOINT }}
         run: |
           node -e "
           const axios = require('axios');
-          const SOURCE_ORG = process.env.SOURCE_ORG;
-          const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-          const API_URL_SOURCE = \`https://api.github.com/orgs/\${SOURCE_ORG}/installations\`;
+          const { BASE_GITHUB_API_URL, INSTALLATIONS_ENDPOINT, REPOS_ENDPOINT, GITHUB_TOKEN, SOURCE_ORG } = process.env;
 
-          const getGitHubAppInstallations = async () => {
+          const fetchData = async (endpoint, description) => {
               try {
-                  console.log(\`Fetching GitHub App installations for organization '\${SOURCE_ORG}'...\`);
-                  console.log('API URL:', API_URL_SOURCE);
-
-                  const response = await axios.get(API_URL_SOURCE, {
+                  const response = await axios.get(\`\${BASE_GITHUB_API_URL}\${endpoint}\`, {
                       headers: {
                           Authorization: \`Bearer \${GITHUB_TOKEN}\`,
                           Accept: 'application/vnd.github.v3+json',
                       },
                   });
-
-                  console.log('Full response data:', response.data);
-
-                  // Ensure response.data is an array or has installations array
-                  const installations = Array.isArray(response.data) ? response.data : response.data.installations;
-
-                  if (Array.isArray(installations)) {
-                      console.log(\`==================================================\`);
-                      console.log(\`Installed applications in organization '\${SOURCE_ORG}':\`);
-                      installations.forEach((installation) => {
-                          console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);
-                      });
-                      console.log(\`==================================================\`);
-                  } else {
-                      console.log('Error: Expected installations to be an array.');
-                      console.log('Received data:', installations);
-                  }
+                  return response.data;
               } catch (error) {
-                  console.error('Error fetching GitHub App installations:', error.response ? error.response.data : error.message);
+                  console.error(\`Error fetching \${description}: \`, error.response ? error.response.data : error.message);
+                  throw new Error(\`Failed to fetch \${description}\`);
               }
           };
 
-          getGitHubAppInstallations();
+          const logInstallations = (installations) => {
+              console.log(\`===================Installed Apps====================\`);
+              installations.forEach((installation) => {
+                  console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);
+              });
+              console.log(\`=====================================================\`);
+          };
+
+          const logRepositories = (repos) => {
+              console.log(\`===================Repo List=========================\`);
+              repos.forEach((repo) => {
+                  console.log(\`[ Repo Name: \${repo.name}, Repo ID: \${repo.id} ]\`);
+              });
+              console.log(\`=====================================================\`);
+          };
+
+          (async () => {
+              const installations = await fetchData(INSTALLATIONS_ENDPOINT, 'GitHub App installations');
+              logInstallations(Array.isArray(installations) ? installations : installations.installations);
+
+              const repositories = await fetchData(REPOS_ENDPOINT, 'repositories');
+              logRepositories(repositories);
+          })();
           "
