@@ -9,7 +9,7 @@ on:
         default: 'test-git-actions'
       github_token:
         description: 'Enter your GitHub token'
-        required: true
+        required: false
 
 env:
   BASE_GITHUB_API_URL: "https://api.github.com"
