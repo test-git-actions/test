@@ -39,7 +39,7 @@ jobs:
       - name: Fetch GitHub App installations and repositories
         env:
           SOURCE_ORG: ${{ github.event.inputs.source_org }}
-          GITHUB_TOKEN: ${{ secrets.PAT || github.event.inputs.github_token }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token || secrets.PAT }}
           BASE_GITHUB_API_URL: ${{ env.BASE_GITHUB_API_URL }}
           INSTALLATIONS_ENDPOINT: ${{ env.INSTALLATIONS_ENDPOINT }}
           REPOS_ENDPOINT: ${{ env.REPOS_ENDPOINT }}
