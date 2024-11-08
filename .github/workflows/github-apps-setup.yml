@@ -17,8 +17,8 @@ jobs:
             const issueBody = context.payload.issue.body;
             
             // Extract org name and token from the issue body using regex
-            const orgNameMatch = issueBody.match(/Enter the GitHub organization name:\s*\n*(.*)/);
-            const tokenMatch = issueBody.match(/Enter your GitHub token:\s*\n*(.*)/);
+            const orgNameMatch = issueBody.match(/Enter the GitHub organization name\s*\n*(.*)/);
+            const tokenMatch = issueBody.match(/Enter your GitHub token\s*\n*(.*)/);
 
             const orgName = orgNameMatch ? orgNameMatch[1].trim() : "";
             const token = tokenMatch ? tokenMatch[1].trim() : "";
