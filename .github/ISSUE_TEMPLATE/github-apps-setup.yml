@@ -9,17 +9,15 @@ body:
       label: "Enter the GitHub organization name"
       description: "The name of your GitHub organization"
       placeholder: "e.g., my-org"
-      required: true
 
   - type: textarea
     id: token
     attributes:
       label: "Enter your GitHub token"
-      description: "Your GitHub personal access token (will not be stored securely)"
+      description: "Your GitHub personal access token (ensure it has 'repo' and 'workflow' scopes)"
       placeholder: "ghp_XXXXXXXXXXXXXXXXXXXX"
-      required: true
 
   - type: markdown
     attributes:
       value: |
-        **Note**: Make sure your token has the necessary permissions (`repo`, `workflow`). Do not share your token publicly.
+        **Note**: Ensure your token has the necessary permissions. Do not share your token publicly.
