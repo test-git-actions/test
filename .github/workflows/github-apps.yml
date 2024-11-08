@@ -1,48 +1,61 @@
-name: Get GitHub App Installations and Repositories
-
+name: "Extract Org and Fetch GitHub Data"
 on:
-  workflow_dispatch:
-    inputs:
-      source_org:
-        description: 'Enter the GitHub organization name'
-        required: true
-        default: 'test-git-actions'
-      github_token:
-        description: 'Enter your GitHub token'
-        required: false
+  issues:
+    types: [opened, edited]
 
 env:
   BASE_GITHUB_API_URL: "https://api.github.com"
-  INSTALLATIONS_ENDPOINT: "/orgs/${{ github.event.inputs.source_org }}/installations"
-  REPOS_ENDPOINT: "/orgs/${{ github.event.inputs.source_org }}/repos"
 
 jobs:
-  fetch-data:
+  extract-and-fetch:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
+    steps:
+      # Step 1: Extract org name and token using GitHub Script
+      - name: Extract Org and Token
+        id: extract_data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            
+            // Extract org name and token from the issue body using regex
+            const orgNameMatch = issueBody.match(/Enter the GitHub organization name\s*\n*(.*)/);
+            const tokenMatch = issueBody.match(/Enter your GitHub token\s*\n*(.*)/);
+
+            const orgName = orgNameMatch ? orgNameMatch[1].trim() : "";
+            const token = tokenMatch ? tokenMatch[1].trim() : "";
+
+            core.setOutput("org_name", orgName);
+            core.setOutput("token", token);
+
+      # Step 2: Print extracted values (for debugging)
+      - name: Print extracted values
+        run: |
+          echo "Organization: ${{ steps.extract_data.outputs.org_name }}"
+          echo "Token: [REDACTED]"
+        env:
+          ORG_NAME: ${{ steps.extract_data.outputs.org_name }}
+          TOKEN: ${{ steps.extract_data.outputs.token }}
+
+      # Step 3: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Log input variables
-        run: |
-          echo "Source Organization: ${{ github.event.inputs.source_org }}"
-          echo "GitHub Token: [REDACTED]"
-
+      # Step 4: Install Axios dependency
       - name: Install dependencies
         run: npm install axios
 
+      # Step 5: Fetch GitHub App installations and repositories using the extracted data
       - name: Fetch GitHub App installations and repositories
         env:
-          SOURCE_ORG: ${{ github.event.inputs.source_org }}
-          GITHUB_TOKEN: ${{ github.event.inputs.github_token || secrets.PAT }}
+          SOURCE_ORG: ${{ steps.extract_data.outputs.org_name }}
+          GITHUB_TOKEN: ${{ steps.extract_data.outputs.token }}
           BASE_GITHUB_API_URL: ${{ env.BASE_GITHUB_API_URL }}
-          INSTALLATIONS_ENDPOINT: ${{ env.INSTALLATIONS_ENDPOINT }}
-          REPOS_ENDPOINT: ${{ env.REPOS_ENDPOINT }}
+          INSTALLATIONS_ENDPOINT: "/orgs/${{ steps.extract_data.outputs.org_name }}/installations"
+          REPOS_ENDPOINT: "/orgs/${{ steps.extract_data.outputs.org_name }}/repos"
         run: |
           node -e "
           const axios = require('axios');
