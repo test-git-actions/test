@@ -1,4 +1,4 @@
-name: "Use Workflow Setup"
+name: "GitHub Apps Setup"
 description: "Enter details for GitHub organization and token"
 title: "[WORKFLOW SETUP]"
 labels: ["automation", "setup"]
