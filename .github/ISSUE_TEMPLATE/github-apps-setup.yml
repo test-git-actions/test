@@ -1,0 +1,25 @@
+name: "Use Workflow Setup"
+description: "Enter details for GitHub organization and token"
+title: "[WORKFLOW SETUP]"
+labels: ["automation", "setup"]
+body:
+  - type: input
+    id: org_name
+    attributes:
+      label: "Enter the GitHub organization name"
+      description: "The name of your GitHub organization"
+      placeholder: "e.g., my-org"
+      required: true
+
+  - type: textarea
+    id: token
+    attributes:
+      label: "Enter your GitHub token"
+      description: "Your GitHub personal access token (will not be stored securely)"
+      placeholder: "ghp_XXXXXXXXXXXXXXXXXXXX"
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        **Note**: Make sure your token has the necessary permissions (`repo`, `workflow`). Do not share your token publicly.
