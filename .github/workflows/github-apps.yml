@@ -44,12 +44,12 @@ jobs:
         with:
           node-version: '18'
 
-      # Step 4: Install Axios dependency
+      # Step 4: Install Axios and xlsx dependencies
       - name: Install dependencies
-        run: npm install axios
+        run: npm install axios xlsx
 
-      # Step 5: Fetch GitHub App installations and repositories using the extracted data
-      - name: Fetch GitHub App installations and repositories
+      # Step 5: Fetch GitHub App installations and repositories, and store output in Excel
+      - name: Fetch GitHub App installations and repositories, and generate Excel
         env:
           SOURCE_ORG: ${{ steps.extract_data.outputs.org_name }}
           GITHUB_TOKEN: ${{ secrets.PAT || steps.extract_data.outputs.token }}
@@ -57,46 +57,67 @@ jobs:
           INSTALLATIONS_ENDPOINT: "/orgs/${{ steps.extract_data.outputs.org_name }}/installations"
           REPOS_ENDPOINT: "/orgs/${{ steps.extract_data.outputs.org_name }}/repos"
         run: |
-          node -e "
           const axios = require('axios');
+          const xlsx = require('xlsx');
+          const fs = require('fs');
           const { BASE_GITHUB_API_URL, INSTALLATIONS_ENDPOINT, REPOS_ENDPOINT, GITHUB_TOKEN } = process.env;
 
           const fetchData = async (endpoint, description) => {
               try {
-                  const response = await axios.get(\`\${BASE_GITHUB_API_URL}\${endpoint}\`, {
+                  const response = await axios.get(`${BASE_GITHUB_API_URL}${endpoint}`, {
                       headers: {
-                          Authorization: \`Bearer \${GITHUB_TOKEN}\`,
+                          Authorization: `Bearer ${GITHUB_TOKEN}`,
                           Accept: 'application/vnd.github.v3+json',
                       },
                   });
                   return response.data;
               } catch (error) {
-                  console.error(\`Error fetching \${description}: \`, error.response ? error.response.data : error.message);
-                  throw new Error(\`Failed to fetch \${description}\`);
+                  console.error(`Error fetching ${description}: `, error.response ? error.response.data : error.message);
+                  throw new Error(`Failed to fetch ${description}`);
               }
           };
 
-          const logInstallations = (installations) => {
-              console.log(\`===================Installed Apps====================\`);
-              installations.forEach((installation) => {
-                  console.log(\`App Name: \${installation.app_slug}, App ID: \${installation.id}\`);
-              });
-              console.log(\`=====================================================\`);
-          };
-
-          const logRepositories = (repos) => {
-              console.log(\`===================Repo List=========================\`);
-              repos.forEach((repo) => {
-                  console.log(\`[ Repo Name: \${repo.name}, Repo ID: \${repo.id} ]\`);
-              });
-              console.log(\`=====================================================\`);
-          };
-
           (async () => {
+              // Fetch data
               const installations = await fetchData(INSTALLATIONS_ENDPOINT, 'GitHub App installations');
-              logInstallations(Array.isArray(installations) ? installations : installations.installations);
-
               const repositories = await fetchData(REPOS_ENDPOINT, 'repositories');
-              logRepositories(repositories);
+
+              // Prepare data for Excel
+              const installationData = Array.isArray(installations) ? installations : installations.installations;
+              const repoData = Array.isArray(repositories) ? repositories : repositories.repositories;
+
+              // Create Excel workbook
+              const workbook = xlsx.utils.book_new();
+              
+              // Add installations sheet
+              const installationSheet = xlsx.utils.json_to_sheet(
+                  installationData.map(install => ({
+                      AppName: install.app_slug,
+                      AppID: install.id,
+                      Account: install.account?.login,
+                  }))
+              );
+              xlsx.utils.book_append_sheet(workbook, installationSheet, 'Installations');
+
+              // Add repositories sheet
+              const repoSheet = xlsx.utils.json_to_sheet(
+                  repoData.map(repo => ({
+                      RepoName: repo.name,
+                      RepoID: repo.id,
+                      Private: repo.private,
+                  }))
+              );
+              xlsx.utils.book_append_sheet(workbook, repoSheet, 'Repositories');
+
+              // Write Excel file
+              const filePath = './github_data.xlsx';
+              xlsx.writeFile(workbook, filePath);
           })();
-          "
+
+      # Step 6: Upload Excel file as artifact
+      - name: Upload GitHub Data Excel as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: github-data
+          path: ./github_data.xlsx
+          retention-days: 7
