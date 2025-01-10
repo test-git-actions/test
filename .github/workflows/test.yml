@@ -46,11 +46,12 @@ jobs:
               runs = response.json()['workflow_runs']
               total_runs = len(runs)
 
-              # Print the fetched runs data to the console
               print("Fetched Workflow Runs:")
-              print(runs)  # This will print the raw JSON data
+              for run in runs:
+                  print(f"ID: {run['id']}, Name: {run['name']}, Run Number: {run['run_number']}, Status: {run['status']}, Conclusion: {run['conclusion']}, Actor: {run['actor']['login']}")
+
               
-              df = pd.DataFrame(response.json()['workflow_runs'])[['id', 'name', 'run_number', 'status', 'conclusion']]
+              df = pd.DataFrame(response.json()['workflow_runs'])[['id', 'name', 'run_number', 'status', 'conclusion', 'actor.login']]
               # Save to CSV
               df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=True, header=True)
 
