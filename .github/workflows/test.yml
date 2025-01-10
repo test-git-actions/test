@@ -97,3 +97,10 @@ jobs:
       # Step 4: Upload the summary to GitHub Actions
       - name: Add summary to workflow
         run: cat summary.md >> $GITHUB_STEP_SUMMARY
+
+       # Step 4: Upload the CSV as an artifact
+      - name: Upload workflow_runs.csv
+        uses: actions/upload-artifact@v3
+        with:
+          name: workflow-runs
+          path: workflow_runs.csv
