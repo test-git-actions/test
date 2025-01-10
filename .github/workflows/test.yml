@@ -62,27 +62,29 @@ jobs:
               df = pd.DataFrame(data)
               total_keys = len(df.columns)  # Calculate the number of columns (keys)
 
-              # Print the number of keys and total runs to the console
-              print(f"Total Workflow Runs: {total_runs}")
-              print(f"Total number of keys in data: {total_keys}")
-
               # Save to CSV
               df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=True, header=True)
 
-              # Generate Markdown table
-              markdown_table = tabulate(
-                  df.head(10),  # Limit to the top 10 rows for display
-                  headers="keys",
-                  tablefmt="github",
-                  showindex=False
-              )
+              # Generate Markdown table with pagination
+              page_size = 20  # Number of rows per page
+              num_pages = (total_runs + page_size - 1) // page_size  # Calculate total pages
 
-              # Write to summary
               with open("summary.md", "w") as summary_file:
                   summary_file.write("# Workflow Runs Summary\n\n")
                   summary_file.write(f"**Total Workflow Runs: {total_runs}**\n")
                   summary_file.write(f"**Total Keys in Data: {total_keys}**\n\n")
-                  summary_file.write(markdown_table)
+
+                  for page in range(num_pages):
+                      start = page * page_size
+                      end = min(start + page_size, total_runs)
+                      markdown_table = tabulate(
+                          df.iloc[start:end],
+                          headers="keys",
+                          tablefmt="github",
+                          showindex=False
+                      )
+                      summary_file.write(f"### Page {page + 1}\n\n")
+                      summary_file.write(markdown_table + "\n\n")
 
           if __name__ == "__main__":
               workflow_run()
