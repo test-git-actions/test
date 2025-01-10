@@ -50,13 +50,13 @@ jobs:
               data = []
               for idx, run in enumerate(runs, start=1):  # Add serial number
                   data.append({
-                      'serial': idx,
-                      'id': run['id'],
-                      'name': run['name'],
-                      'run_number': run['run_number'],
-                      'status': run['status'],
-                      'conclusion': run['conclusion'],
-                      'actor_login': run['actor']['login'] if run.get('actor') else 'N/A'
+                      'Serial No.': idx,
+                      'Id': run['id'],
+                      'Name': run['name'],
+                      'Run Number': run['run_number'],
+                      'Status': run['status'],
+                      'Conclusion': run['conclusion'],
+                      'Actor': run['actor']['login'] if run.get('actor') else 'N/A'
                   })
 
               # Create DataFrame
