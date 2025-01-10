@@ -48,8 +48,9 @@ jobs:
 
               # Extract data and handle nested fields (actor.login)
               data = []
-              for run in runs:
+              for idx, run in enumerate(runs, start=1):  # Add serial number
                   data.append({
+                      'serial': idx,
                       'id': run['id'],
                       'name': run['name'],
                       'run_number': run['run_number'],
@@ -63,7 +64,7 @@ jobs:
               total_keys = len(df.columns)  # Calculate the number of columns (keys)
 
               # Save to CSV
-              df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=True, header=True)
+              df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=False, header=True)
 
               # Generate Markdown table with pagination
               page_size = 20  # Number of rows per page
