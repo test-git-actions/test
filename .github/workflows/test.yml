@@ -46,12 +46,26 @@ jobs:
               runs = response.json()['workflow_runs']
               total_runs = len(runs)
 
-              print("Fetched Workflow Runs:")
+              # Extract data and handle nested fields (actor.login)
+              data = []
               for run in runs:
-                  print(f"ID: {run['id']}, Name: {run['name']}, Run Number: {run['run_number']}, Status: {run['status']}, Conclusion: {run['conclusion']}, Actor: {run['actor']['login']}")
+                  data.append({
+                      'id': run['id'],
+                      'name': run['name'],
+                      'run_number': run['run_number'],
+                      'status': run['status'],
+                      'conclusion': run['conclusion'],
+                      'actor_login': run['actor']['login'] if run.get('actor') else 'N/A'
+                  })
 
-              
-              df = pd.DataFrame(response.json()['workflow_runs'])[['id', 'name', 'run_number', 'status', 'conclusion', 'actor.login']]
+              # Create DataFrame
+              df = pd.DataFrame(data)
+              total_keys = len(df.columns)  # Calculate the number of columns (keys)
+
+              # Print the number of keys and total runs to the console
+              print(f"Total Workflow Runs: {total_runs}")
+              print(f"Total number of keys in data: {total_keys}")
+
               # Save to CSV
               df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=True, header=True)
 
@@ -62,10 +76,12 @@ jobs:
                   tablefmt="github",
                   showindex=False
               )
+
+              # Write to summary
               with open("summary.md", "w") as summary_file:
-                  summary_file.write("# Workflow Runs Summary\n")
-                  summary_file.write("\n")
-                  summary_file.write(f"**Total Workflow Runs: {total_runs}**\n\n")
+                  summary_file.write("# Workflow Runs Summary\n\n")
+                  summary_file.write(f"**Total Workflow Runs: {total_runs}**\n")
+                  summary_file.write(f"**Total Keys in Data: {total_keys}**\n\n")
                   summary_file.write(markdown_table)
 
           if __name__ == "__main__":
