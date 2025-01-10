@@ -73,7 +73,6 @@ jobs:
               with open("summary.md", "w") as summary_file:
                   summary_file.write("# Workflow Runs Summary\n\n")
                   summary_file.write(f"**Total Workflow Runs: {total_runs}**\n")
-                  summary_file.write(f"**Total Keys in Data: {total_keys}**\n\n")
 
                   for page in range(num_pages):
                       start = page * page_size
