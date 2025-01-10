@@ -1,10 +1,12 @@
-name: Run Python Script
-run-name: "(CI) - ${{ github.event.head_commit.message }}"
+name: Run Python Script on Push
 
 on:
   push:
     branches:
-      - main
+      - main  # Replace with the branch you want this workflow to trigger on
+
+env:
+  GITHUB_TOKEN: ${{ secrets.PAT }}
 
 jobs:
   run-script:
@@ -26,13 +28,14 @@ jobs:
       # Step 3: Run the Python script
       - name: Fetch and process workflow data
         run: |
+          python - <<'EOF'
           import requests
           import pandas as pd
           import os
           from tabulate import tabulate
 
           def workflow_run():
-              auth = f"Bearer {os.getenv('GITHUB_PAT')}"
+              auth = f"Bearer {os.getenv('GITHUB_TOKEN')}"
               url = "https://api.github.com/repos/MGMResorts/mgm-af-migrations-via-actions/actions/workflows/110635589/runs?per_page=200"
               headers = {
                   'Accept': 'application/vnd.github+json',
@@ -59,6 +62,7 @@ jobs:
           if __name__ == "__main__":
               workflow_run()
               print("Data fetched and summary generated successfully")
+          EOF
 
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
