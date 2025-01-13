@@ -49,10 +49,12 @@ jobs:
               # Extract data and handle nested fields (actor.login)
               data = []
               for idx, run in enumerate(runs, start=1):  # Add serial number
+                  print(run)
                   data.append({
                       'Serial No.': idx,
                       'Id': run['id'],
                       'Name': run['name'],
+                      # 'Repo Name'
                       'Run Number': run['run_number'],
                       'Status': run['status'],
                       'Conclusion': run['conclusion'],
