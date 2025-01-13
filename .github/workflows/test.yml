@@ -60,7 +60,6 @@ jobs:
                       'Status': run['status'],
                       'Conclusion': run['conclusion'],
                       'Actor': run['actor']['login'] if run.get('actor') else 'N/A',
-                      'Run URL': f"[View Run]({run['html_url']})"
                   })
 
               # Create DataFrame
