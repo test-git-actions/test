@@ -43,7 +43,7 @@ jobs:
                   'X-GitHub-Api-Version': '2022-11-28'
               }
               response = requests.request("GET", url, headers=headers)
-              runs = response.json().get('workflow_runs', [])
+              runs = response.json()['workflow_runs']
               total_runs = len(runs)
 
               # Extract data and handle nested fields (actor.login)
