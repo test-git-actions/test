@@ -71,28 +71,28 @@ jobs:
 
               # Generate Markdown table with pagination
               page_size = 20  # Number of rows per page
-              num_pages = (total_runs + page_size - 1) // page_size  # Calculate total pages
+              num_pages = (total_runs + 19) ## (total_runs + page_size - 1) // page_size  # Calculate total pages
 
               with open("summary.md", "w") as summary_file:
-              summary_file.write("# Workflow Runs Summary\n\n")
-              summary_file.write(f"**Total Workflow Runs: {total_runs}**\n\n")
+                summary_file.write("# Workflow Runs Summary\n\n")
+                summary_file.write(f"**Total Workflow Runs: {total_runs}**\n\n")
       
-              # Generate paginated tables
-              for page in range(total_pages):
-                  start = page * 20
-                  end = min(start + 20, total_runs)
-                  markdown_table = tabulate(
-                      df.iloc[start:end],
-                      headers="keys",
-                      tablefmt="github",
-                      showindex=False
-                  )
-                  summary_file.write(f"### Page {page + 1}\n\n")
-                  summary_file.write(markdown_table + "\n\n")
-                  if page < total_pages - 1:
-                      summary_file.write(f"[Next Page →](#page-{page + 2})\n\n")
-                  if page > 0:
-                      summary_file.write(f"[← Previous Page](#page-{page})\n\n")
+                # Generate paginated tables
+                for page in range(total_pages):
+                    start = page * 20
+                    end = min(start + 20, total_runs)
+                    markdown_table = tabulate(
+                        df.iloc[start:end],
+                        headers="keys",
+                        tablefmt="github",
+                        showindex=False
+                    )
+                    summary_file.write(f"### Page {page + 1}\n\n")
+                    summary_file.write(markdown_table + "\n\n")
+                    if page < total_pages - 1:
+                        summary_file.write(f"[Next Page →](#page-{page + 2})\n\n")
+                    if page > 0:
+                        summary_file.write(f"[← Previous Page](#page-{page})\n\n")
 
           if __name__ == "__main__":
               workflow_run()
