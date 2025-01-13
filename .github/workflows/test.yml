@@ -54,7 +54,7 @@ jobs:
                       'Serial No.': idx,
                       'Id': run['id'],
                       'Name': run['name'],
-                      'Repo Name': run['url'].split('/repos/')[-1].split('/actions')[0]
+                      'Repo Name': run['url'].split('/repos/')[-1].split('/actions')[0],
                       'Run Number': run['run_number'],
                       'Status': run['status'],
                       'Conclusion': run['conclusion'],
