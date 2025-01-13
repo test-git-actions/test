@@ -3,7 +3,7 @@ name: Run Python Script on Push
 on:
   push:
     branches:
-      - main  # Replace with the branch you want this workflow to trigger on
+      - main
 
 env:
   GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'  # Match the Python version used in your script
+          python-version: '3.11'
 
       # Step 2: Install dependencies
       - name: Install dependencies
@@ -42,7 +42,7 @@ jobs:
                   'Authorization': auth,
                   'X-GitHub-Api-Version': '2022-11-28'
               }
-              response = requests.request("GET", url, headers=headers)
+              response = requests.get(url, headers=headers)
               
               if response.status_code != 200:
                   print(f"Failed to fetch data: {response.status_code} - {response.text}")
@@ -51,14 +51,16 @@ jobs:
               runs = response.json().get('workflow_runs', [])
               total_runs = len(runs)
 
-              # Extract data and handle nested fields (actor.login)
+              if total_runs == 0:
+                  print("No workflow runs found.")
+                  return
+
               data = []
-              for idx, run in enumerate(runs, start=1):  # Add serial number
+              for idx, run in enumerate(runs, start=1):
                   data.append({
                       'Serial No.': idx,
                       'Id': f"<a href='{run['html_url']}' target='_blank'>{run['id']}</a>",
                       'Name': run['name'],
-                      'Repo Name': run['url'].split('/repos/')[-1].split('/actions')[0],
                       'Branch': run['head_branch'],
                       'Run Number': run['run_number'],
                       'Status': run['status'],
@@ -66,22 +68,15 @@ jobs:
                       'Actor': run['actor']['login'] if run.get('actor') else 'N/A',
                   })
 
-              # Create DataFrame
               df = pd.DataFrame(data)
-              total_keys = len(df.columns)  # Calculate the number of columns (keys)
+              df.to_csv("workflow_runs.csv", sep='\t', index=False)
 
-              # Save to CSV
-              df.to_csv("workflow_runs.csv", sep='\t', encoding='utf-8', index=False, header=True)
-
-              # Generate Markdown table with pagination
-              page_size = 20  # Number of rows per page
+              page_size = 20
               total_pages = (total_runs + page_size - 1) // page_size
 
               with open("summary.md", "w") as summary_file:
                   summary_file.write("# Workflow Runs Summary\n\n")
                   summary_file.write(f"**Total Workflow Runs: {total_runs}**\n\n")
-              
-                  # Generate paginated tables
                   for page in range(total_pages):
                       start = page * page_size
                       end = min(start + page_size, total_runs)
@@ -91,28 +86,33 @@ jobs:
                           tablefmt="github",
                           showindex=False
                       )
-                      summary_file.write(f"### Page {page + 1} <a name='page-{page + 1}'></a>\n\n")
+                      summary_file.write(f"### Page {page + 1}\n\n")
                       summary_file.write(markdown_table + "\n\n")
-                      
-                      # Add navigation links
-                      if page < total_pages - 1:
-                          summary_file.write(f"[Next Page →](#page-{page + 2})\n\n")
-                      if page > 0:
-                          summary_file.write(f"[← Previous Page](#page-{page})\n\n")
 
           if __name__ == "__main__":
-              workflow_run()
-              print("Data fetched and summary generated successfully")
+              try:
+                  workflow_run()
+                  print("Data fetched and summary generated successfully")
+              except Exception as e:
+                  print(f"Error: {e}")
           EOF
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 4: Add summary to workflow
+      # Step 4: Check if summary.md exists
+      - name: Check if summary.md exists
+        run: |
+          if [ ! -f "summary.md" ]; then
+            echo "Error: summary.md was not created."
+            exit 1
+          fi
+
+      # Step 5: Add summary to workflow
       - name: Add summary to workflow
         run: cat summary.md >> $GITHUB_STEP_SUMMARY
 
-      # Step 5: Upload the CSV as an artifact
+      # Step 6: Upload the CSV as an artifact
       - name: Upload workflow_runs.csv
         uses: actions/upload-artifact@v4
         with:
