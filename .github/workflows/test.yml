@@ -52,7 +52,7 @@ jobs:
                   print(run)
                   data.append({
                       'Serial No.': idx,
-                      'Id': f"[{run['id']}]({run['html_url']})",
+                      'Id': f"<a href='{run['html_url']}' target='_blank'>{run['id']}</a>",
                       'Name': run['name'],
                       'Repo Name': run['url'].split('/repos/')[-1].split('/actions')[0],
                       'Branch': run['head_branch'],
