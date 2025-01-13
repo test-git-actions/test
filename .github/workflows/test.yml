@@ -53,14 +53,15 @@ jobs:
                   data.append({
                       'Serial No.': idx,
                       'Id': run['id'],
-                      'Id': f"[{run['id']}](run['url'])",
+                      'Id': f"[{run['id']}]({run['url']})",
                       'Name': run['name'],
                       'Repo Name': run['url'].split('/repos/')[-1].split('/actions')[0],
                       'Branch': run['head_branch'],
                       'Run Number': run['run_number'],
                       'Status': run['status'],
                       'Conclusion': run['conclusion'],
-                      'Actor': run['actor']['login'] if run.get('actor') else 'N/A'
+                      'Actor': run['actor']['login'] if run.get('actor') else 'N/A',
+                      'Run URL': f"[View Run]({run['url']})"
                   })
 
               # Create DataFrame
