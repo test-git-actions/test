@@ -114,7 +114,7 @@ jobs:
         if: ${{ env.INSTALL_PREREQS == 'true' }}
         run: |
           sudo apt-get update
-          sudo apt-get install --yes git unzip curl wget apt-transport-https software-properties-common
+          sudo apt-get install --yes git unzip curl wget
    
           - name: Save repo details to variables
           if: always()
