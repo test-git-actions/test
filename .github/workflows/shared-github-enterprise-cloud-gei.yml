@@ -156,6 +156,8 @@ jobs:
             echo "Repository Name: ${{ needs.migrate.outputs.repo_name }}"
             echo "Repository Org: ${{ needs.migrate.outputs.repo_org }}"
             echo "Target Org: ${{ needs.migrate.outputs.target_org }}"
+            echo "Action: ${{ needs.migrate.outputs.pipeline_action }}"
+            echo "ID: ${{ needs.migrate.outputs.pipeline_id }}"
         
       - name: Trigger Commit-history-mapping in Target
         uses: peter-evans/repository-dispatch@v1
