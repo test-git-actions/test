@@ -118,14 +118,21 @@ jobs:
           reponame=$(basename ${{ matrix.repository }})
           repoorg=$(basename $(dirname ${{ matrix.repository }}))
           targetorg="${{ fromJson(needs.prepare.outputs.parsed-issue).target_organization }}"
-
+          pipeline_action="${{ fromJson(needs.prepare.outputs.PIPELINE_ACTION) }}"
+          pipeline_id="${{ fromJson(needs.prepare.outputs.PIPELINE_ID) }}"
+          
           echo "REPO_NAME=$reponame" >> "$GITHUB_ENV"
           echo "REPO_ORG=$repoorg" >> "$GITHUB_ENV"
           echo "TARGET_ORG=$targetorg" >> "$GITHUB_ENV"
+          echo "PIPELINE_ACTION=$pipeline_action" >> "$GITHUB_ENV"
+          echo "PIPELINE_ID=$pipeline_id" >> "$GITHUB_ENV"
 
           echo "repo_name=$reponame" >> "$GITHUB_OUTPUT"
           echo "repo_org=$repoorg" >> "$GITHUB_OUTPUT"
           echo "target_org=$targetorg" >> "$GITHUB_OUTPUT"
+
+          echo "pipeline_action=$pipeline_action" >> "$GITHUB_OUTPUT"
+          echo "pipeline_id=$pipeline_id" >> "$GITHUB_OUTPUT"
 
           echo "Saved details: Repo_Name=$reponame, Repo_Org=$repoorg, Target_Org=$targetorg"
           
