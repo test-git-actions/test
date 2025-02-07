@@ -18,6 +18,8 @@ jobs:
       AZURE_DEVOPS_ORG: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).azure_devops_organization }}
       AZURE_DEVOPS_PROJECT: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).azure_devops_project }}
       ADO2GHA_DOWNLOAD_BRANCH: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).ado2gha_download_branch }}
+      PIPELINE_ACTION: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).PIPELINE_ACTION }}
+      PIPELINE_ID: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).PIPELINE_ID }}
       parsed-issue: ${{ steps.parse-issue-body.outputs.jsonString }}
 
     if: github.event_name == 'issue_comment' &&
@@ -120,8 +122,8 @@ jobs:
           reponame=$(basename ${{ matrix.repository }})
           repoorg=$(basename $(dirname ${{ matrix.repository }}))
           targetorg="${{ fromJson(needs.prepare.outputs.parsed-issue).target_organization }}"
-          pipeline_action="${{ fromJson(needs.prepare.outputs.parsed-issue).PIPELINE_ACTION }}"
-          pipeline_id="${{ fromJson(needs.prepare.outputs.parsed-issue).PIPELINE_ID }}"
+          pipeline_action="${{ needs.prepare.outputs.PIPELINE_ACTION }}"
+          pipeline_id="${{ needs.prepare.outputs.PIPELINE_ID }}"
           
           echo "REPO_NAME=$reponame" >> "$GITHUB_ENV"
           echo "REPO_ORG=$repoorg" >> "$GITHUB_ENV"
@@ -135,7 +137,7 @@ jobs:
 
           echo "pipeline_action=$pipeline_action" >> "$GITHUB_OUTPUT"
           echo "pipeline_id=$pipeline_id" >> "$GITHUB_OUTPUT"
-          
+      
           echo "Saved details: Repo_Name=$reponame, Repo_Org=$repoorg, Target_Org=$targetorg"
           echo "Debug PIPELINE_ACTION: $pipeline_action"
           echo "Debug PIPELINE_ID: $pipeline_id"
