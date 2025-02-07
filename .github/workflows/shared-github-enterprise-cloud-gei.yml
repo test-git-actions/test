@@ -149,7 +149,7 @@ jobs:
       - name: Trigger Commit-history-mapping in Target
         uses: peter-evans/repository-dispatch@v1
         with:
-            token: ${{ secrets.PAT }}
+            token: ${{ secrets.GITHUB_TOKEN  }}
             event-type: ADO2GHA-Migration2_0
             client-payload: |
                 {
