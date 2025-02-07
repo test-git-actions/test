@@ -100,6 +100,8 @@ jobs:
       repo_name: ${{ steps.save-repo-details.outputs.repo_name }}
       repo_org: ${{ steps.save-repo-details.outputs.repo_org }}
       target_org: ${{ steps.save-repo-details.outputs.target_org }}
+      pipeline_action: ${{ steps.save-repo-details.outputs.pipeline_action }}
+      pipeline_id: ${{ steps.save-repo-details.outputs.pipeline_id }}
 
     steps:
       - name: Check Lock Source Repository Value
@@ -118,8 +120,8 @@ jobs:
           reponame=$(basename ${{ matrix.repository }})
           repoorg=$(basename $(dirname ${{ matrix.repository }}))
           targetorg="${{ fromJson(needs.prepare.outputs.parsed-issue).target_organization }}"
-          pipeline_action="${{ fromJson(needs.prepare.outputs.PIPELINE_ACTION) }}"
-          pipeline_id="${{ fromJson(needs.prepare.outputs.PIPELINE_ID) }}"
+          pipeline_action="${{ fromJson(needs.prepare.outputs.parsed-issue).PIPELINE_ACTION }}"
+          pipeline_id="${{ fromJson(needs.prepare.outputs.parsed-issue).PIPELINE_ID }}"
           
           echo "REPO_NAME=$reponame" >> "$GITHUB_ENV"
           echo "REPO_ORG=$repoorg" >> "$GITHUB_ENV"
@@ -133,8 +135,10 @@ jobs:
 
           echo "pipeline_action=$pipeline_action" >> "$GITHUB_OUTPUT"
           echo "pipeline_id=$pipeline_id" >> "$GITHUB_OUTPUT"
-
+          
           echo "Saved details: Repo_Name=$reponame, Repo_Org=$repoorg, Target_Org=$targetorg"
+          echo "Debug PIPELINE_ACTION: $pipeline_action"
+          echo "Debug PIPELINE_ID: $pipeline_id"
           
   ADO2GHA-Migration2_0:
     runs-on: ubuntu-latest
