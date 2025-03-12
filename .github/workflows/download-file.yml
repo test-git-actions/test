@@ -54,10 +54,11 @@ jobs:
                 echo "File saved to: $FILE_PATH"
                 unzip $FILE_PATH -d extracted_pipeline
                 mv extracted_pipeline/*.yml migration.yml              
-                YAML_FILE=$(find extracted_pipeline -type f -name "*.yml" | head -n 1)
+                YAML_FILE=$(find extracted_pipeline -type f -name "*.yml" -print -quit)
                 if [[ -n "$YAML_FILE" ]]; then
                   mv "$YAML_FILE" migration.yml
                   echo "✅ YAML file extracted and renamed to migration.yml."
+                  cat migration.yml
                 else
                   echo "❌ No YAML file found inside the ZIP."
                 fi                
