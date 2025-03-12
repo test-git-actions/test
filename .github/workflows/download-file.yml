@@ -28,8 +28,8 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          file = "${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
-          echo " Extracted = $file "
+          FILE_URL = "${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
+          echo $FILE_URL
 
           RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\().*?(?=\))')
           echo "📎 Extracted RAW URL: $RAW_URL"
