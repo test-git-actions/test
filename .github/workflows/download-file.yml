@@ -24,12 +24,15 @@ jobs:
       - run: echo $JSON_STRING
         env:
           JSON_STRING: ${{ steps.parse-issue-body.outputs.jsonString }}
+          
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          file = ${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}
-          RAW_URL=$(echo "$file" | grep -oP '(?<=\().*?(?=\))')
+          file="${{ steps.parse-issue-body.outputs.jsonString }}"
           
+          # Extract URL inside parentheses (if any)
+          RAW_URL=$(echo "$file" | grep -oE 'https://github.com/user-attachments/files/[^) ]+')
+      
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
             exit 1
