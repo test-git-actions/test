@@ -21,6 +21,6 @@ body:
   - type: textarea
     id: additional_info
     attributes:
-      label: "Additional Information (Optional)"
+      label: "Additional Information"
       description: "Provide any extra details related to this upload request."
       placeholder: "Additional context about the file..."
