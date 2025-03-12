@@ -17,7 +17,9 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/[^\s)]+')
+          # RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/[^\s)]+')
+
+          RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=\().*?(?=\))')
           
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
