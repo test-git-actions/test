@@ -18,12 +18,15 @@ jobs:
         id: extract_url
         run: |
           RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/[^\s)]+')
+          
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
             exit 1
           fi
+      
           echo "Extracted RAW URL: $RAW_URL"
           echo "RAW_URL=$RAW_URL" >> $GITHUB_ENV
+
 
       - name: Download file
         run: |
