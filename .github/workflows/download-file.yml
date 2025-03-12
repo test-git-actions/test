@@ -28,19 +28,20 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          FILE_URL = "${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
-          echo $FILE_URL
-
+          FILE_URL="${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
+          echo "$FILE_URL"
+      
           RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\().*?(?=\))')
           echo "📎 Extracted RAW URL: $RAW_URL"
-              
+                
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
             exit 1
           fi
-      
+          
           echo "Extracted RAW URL: $RAW_URL"
           echo "RAW_URL=$RAW_URL" >> $GITHUB_ENV
+
 
 
       - name: Download file
