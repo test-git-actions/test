@@ -18,7 +18,7 @@ jobs:
         id: extract_url
         run: |
           file = ${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information }}
-          RAW_URL=$(echo "${{ file }}" | grep -oP '(?<=\().*?(?=\))')
+          RAW_URL=$(echo "$file" | grep -oP '(?<=\().*?(?=\))')
           
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
