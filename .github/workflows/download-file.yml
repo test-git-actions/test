@@ -37,13 +37,12 @@ jobs:
             echo "Extracted RAW URL $RAW_URL"
             
             if [[ -n "$RAW_URL" ]]; then
-              if [[ "$RAW_URL" == *.txt ]]; then
-                echo "📜 Text file detected. Downloading and renaming..."
                 TMP_DIR="/tmp/tmp_download"
                 mkdir -p "$TMP_DIR"
                 FILE_NAME=$(basename "$RAW_URL")
                 FILE_PATH="$TMP_DIR/$FILE_NAME"
-                echo "Downloading file..."
+              if [[ "$RAW_URL" == *.txt ]]; then
+                echo "📜 Text file detected. Downloading and renaming..."
                 curl -L "$RAW_URL" -o "$FILE_PATH"
                 echo "File saved to: $FILE_PATH"
                 echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
@@ -51,8 +50,9 @@ jobs:
                 
               elif [[ "$RAW_URL" == *.zip ]]; then
                 echo "📦 ZIP file detected. Downloading and extracting..."
-                gh api -H "Accept: application/vnd.github.v3.raw" "$FILE_URL" > pipeline.zip
-                unzip pipeline.zip -d extracted_pipeline
+                curl -L "$RAW_URL" -o "$FILE_PATH"
+                echo "File saved to: $FILE_PATH"
+                unzip $FILE_PATH -d extracted_pipeline
                 mv extracted_pipeline/*.yml migration.yml              
                 YAML_FILE=$(find extracted_pipeline -type f -name "*.yml" | head -n 1)
                 if [[ -n "$YAML_FILE" ]]; then
