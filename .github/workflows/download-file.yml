@@ -1,9 +1,14 @@
 name: Download File from Issue
 
 on:
-  workflow_dispatch:
+  issue_comment:
+    types: [created]
   issues:
     types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   download-file:
@@ -12,7 +17,7 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/\S+')
+          RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/[^\s)]+')
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
             exit 1
