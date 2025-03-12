@@ -27,7 +27,7 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          file = ${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information }}
+          file = ${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}
           RAW_URL=$(echo "$file" | grep -oP '(?<=\().*?(?=\))')
           
           if [[ -z "$RAW_URL" ]]; then
