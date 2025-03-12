@@ -41,11 +41,13 @@ jobs:
                 mkdir -p "$TMP_DIR"
                 FILE_NAME=$(basename "$RAW_URL")
                 FILE_PATH="$TMP_DIR/$FILE_NAME"
+              
               if [[ "$RAW_URL" == *.txt ]]; then
                 echo "📜 Text file detected. Downloading and renaming..."
                 curl -L "$RAW_URL" -o "$FILE_PATH"                
                 echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
                 mv "$FILE_PATH" "$TMP_DIR/migration.yml"
+                echo "✅ Migration file set to migration.yml"
                 cat "$TMP_DIR/migration.yml"
                 
               elif [[ "$RAW_URL" == *.zip ]]; then
@@ -61,6 +63,7 @@ jobs:
                 if [[ -n "$YAML_FILE" ]]; then
                   mv "$YAML_FILE" "$TMP_DIR/migration.yml"
                   echo "✅ First YAML file extracted and renamed to migration.yml."
+                  echo "FILE_PATH=$TMP_DIR/migration.yml" >> $GITHUB_ENV
                   cat "$TMP_DIR/migration.yml"
                 else
                   echo "❌ No YAML file found inside the ZIP."
@@ -76,4 +79,6 @@ jobs:
           fi
 
       - name: List contents of /tmp/tmp_download
-        run: ls -l /tmp/tmp_download
+        run: |
+          echo ${{ env.FILE_PATH }}
+          ls -l /tmp/tmp_download
