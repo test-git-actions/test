@@ -1,25 +1,20 @@
-name: "Download File Request"
-description: "Submit an issue with a file URL to download."
-title: "[Download Request] - "
-labels: ["download", "file"]
+name: "Upload File Request"
+description: "Upload a file and provide relevant details."
+title: "[Upload Request] - "
+labels: ["upload", "file"]
 body:
   - type: markdown
     attributes:
       value: |
-        **Provide the raw GitHub file attachment URL below.**  
-        The workflow will extract this URL and download the file automatically.
-        
-        Example URL format:
-        ```
-        https://github.com/user-attachments/files/1234567/example.txt
-        ```
+        **Attach the file to this issue using GitHub’s file upload feature.**  
+        Drag and drop the file here or click to upload.
 
   - type: input
-    id: file_url
+    id: file_description
     attributes:
-      label: "File URL"
-      description: "Paste the raw file URL here."
-      placeholder: "https://github.com/user-attachments/files/..."
+      label: "File Description"
+      description: "Describe the contents and purpose of the uploaded file."
+      placeholder: "Example: Log file for debugging..."
     validations:
       required: true
 
@@ -27,5 +22,5 @@ body:
     id: additional_info
     attributes:
       label: "Additional Information (Optional)"
-      description: "Provide any extra details related to this file request."
+      description: "Provide any extra details related to this upload request."
       placeholder: "Additional context about the file..."
