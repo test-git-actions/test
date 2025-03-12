@@ -39,10 +39,8 @@ jobs:
             exit 1
           fi
           
-          echo "Extracted RAW URL: $RAW_URL"
           echo "RAW_URL=$RAW_URL" >> $GITHUB_ENV
-
-
+          echo "Extracted RAW URL: $RAW_URL"
 
       - name: Download file
         run: |
