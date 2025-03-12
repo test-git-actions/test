@@ -43,10 +43,10 @@ jobs:
                 FILE_PATH="$TMP_DIR/$FILE_NAME"
               if [[ "$RAW_URL" == *.txt ]]; then
                 echo "📜 Text file detected. Downloading and renaming..."
-                curl -L "$RAW_URL" -o "$FILE_PATH"
-                echo "File saved to: $FILE_PATH"
+                curl -L "$RAW_URL" -o "$FILE_PATH"                
                 echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
-                cat $FILE_PATH
+                mv "$FILE_PATH" "$TMP_DIR/migration.yml"
+                cat "$TMP_DIR/migration.yml"
                 
               elif [[ "$RAW_URL" == *.zip ]]; then
                 echo "📦 ZIP file detected. Downloading and extracting..."
