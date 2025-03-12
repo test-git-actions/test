@@ -32,6 +32,7 @@ jobs:
 
           echo "File saved to: $FILE_PATH"
           echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+          cat $FILE_PATH
 
       - name: List contents of /tmp/tmp_download
         run: ls -l /tmp/tmp_download
