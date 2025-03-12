@@ -32,7 +32,7 @@ jobs:
           echo "$FILE_URL"
       
           RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\().*?(?=\))')
-          echo "📎 Extracted RAW URL: $RAW_URL"
+          echo "Extracted RAW URL $RAW_URL"
                 
           if [[ -z "$RAW_URL" ]]; then
             echo "No valid URL found in the issue body."
