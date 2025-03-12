@@ -1,0 +1,37 @@
+name: Download File from Issue
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  download-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract RAW URL from issue body
+        id: extract_url
+        run: |
+          RAW_URL=$(echo "${{ github.event.issue.body }}" | grep -oE 'https://github.com/user-attachments/files/\S+')
+          if [[ -z "$RAW_URL" ]]; then
+            echo "No valid URL found in the issue body."
+            exit 1
+          fi
+          echo "Extracted RAW URL: $RAW_URL"
+          echo "RAW_URL=$RAW_URL" >> $GITHUB_ENV
+
+      - name: Download file
+        run: |
+          TMP_DIR="/tmp/tmp_download"
+          mkdir -p "$TMP_DIR"
+          FILE_NAME=$(basename "$RAW_URL")
+          FILE_PATH="$TMP_DIR/$FILE_NAME"
+
+          echo "Downloading file..."
+          curl -L "$RAW_URL" -o "$FILE_PATH"
+
+          echo "File saved to: $FILE_PATH"
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+      - name: List contents of /tmp/tmp_download
+        run: ls -l /tmp/tmp_download
