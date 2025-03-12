@@ -28,7 +28,7 @@ jobs:
       - name: Extract RAW URL from issue body
         id: extract_url
         run: |
-          FILE_URL="${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
+          FILE_URL="${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information }}"
           echo "$FILE_URL"
       
           if [[ -n "$FILE_URL" ]]; then
