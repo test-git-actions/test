@@ -31,27 +31,45 @@ jobs:
           FILE_URL="${{ fromJson(steps.parse-issue-body.outputs.jsonString).additional_information_optional }}"
           echo "$FILE_URL"
       
-          RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\]\().*?(?=\))')
-          echo "Extracted RAW URL $RAW_URL"
+          if [[ -n "$FILE_URL" ]]; then
+            echo "📥 Downloading file from: $FILE_URL"            
+            RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\]\().*?(?=\))')
+            echo "Extracted RAW URL $RAW_URL"
+            
+            if [[ -n "$RAW_URL" ]]; then
+              if [[ "$RAW_URL" == *.txt ]]; then
+                echo "📜 Text file detected. Downloading and renaming..."
+                TMP_DIR="/tmp/tmp_download"
+                mkdir -p "$TMP_DIR"
+                FILE_NAME=$(basename "$RAW_URL")
+                FILE_PATH="$TMP_DIR/$FILE_NAME"
+                echo "Downloading file..."
+                curl -L "$RAW_URL" -o "$FILE_PATH"
+                echo "File saved to: $FILE_PATH"
+                echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+                cat $FILE_PATH
                 
-          if [[ -z "$RAW_URL" ]]; then
-            echo "No valid URL found in the issue body."
-            exit 1
+              elif [[ "$RAW_URL" == *.zip ]]; then
+                echo "📦 ZIP file detected. Downloading and extracting..."
+                gh api -H "Accept: application/vnd.github.v3.raw" "$FILE_URL" > pipeline.zip
+                unzip pipeline.zip -d extracted_pipeline
+                mv extracted_pipeline/*.yml migration.yml              
+                YAML_FILE=$(find extracted_pipeline -type f -name "*.yml" | head -n 1)
+                if [[ -n "$YAML_FILE" ]]; then
+                  mv "$YAML_FILE" migration.yml
+                  echo "✅ YAML file extracted and renamed to migration.yml."
+                else
+                  echo "❌ No YAML file found inside the ZIP."
+                fi                
+              else
+                echo "⚠️ Unsupported file type. Only .txt and .zip files are allowed."
+              fi              
+            else
+              echo "⚠️ Unable to extract direct file URL."
+            fi
+          else
+            echo "⚠️ No file URL provided. Skipping download."
           fi
-          
-          echo "RAW_URL=$RAW_URL" >> $GITHUB_ENV
-          echo "Extracted RAW URL: $RAW_URL"
-          TMP_DIR="/tmp/tmp_download"
-          mkdir -p "$TMP_DIR"
-          FILE_NAME=$(basename "$RAW_URL")
-          FILE_PATH="$TMP_DIR/$FILE_NAME"
-
-          echo "Downloading file..."
-          curl -L "$RAW_URL" -o "$FILE_PATH"
-
-          echo "File saved to: $FILE_PATH"
-          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
-          cat $FILE_PATH
 
       - name: List contents of /tmp/tmp_download
         run: ls -l /tmp/tmp_download
