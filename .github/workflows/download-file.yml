@@ -94,7 +94,8 @@ jobs:
       
           axios.get(process.env.ADO_FILE_URL, {
             headers: { 
-              'Authorization': 'Bearer ' + process.env.GH_TOKEN
+              'Authorization': 'Bearer ' + process.env.GH_TOKEN,
+              'withCredentials': true 
             }
           })
           .then(response => console.log(response.data))
