@@ -34,6 +34,7 @@ jobs:
           if [[ -n "$FILE_URL" ]]; then
             echo "📥 Downloading file from: $FILE_URL"            
             RAW_URL=$(echo "$FILE_URL" | grep -oP '(?<=\]\().*?(?=\))')
+            echo "ADO_FILE_URL=$RAW_URL" >> $GITHUB_ENV
             echo "Extracted RAW URL $RAW_URL"
             
             if [[ -n "$RAW_URL" ]]; then
@@ -77,6 +78,32 @@ jobs:
           else
             echo "⚠️ No file URL provided. Skipping download."
           fi
+
+      - name: Set up Node.js
+        continue-on-error: true
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Run fetch script with axios
+        continue-on-error: true
+        run: |
+            npm install axios
+            node -e "
+            const axios = require('axios');
+        
+            axios.get(process.env.ADO_FILE_URL, { 
+              headers: { 
+                'Authorization': `Bearer ${process.env.GH_TOKEN}`
+              }
+            })
+            .then(response => console.log(response.data))
+            .catch(error => console.error('Error:', error));
+            "
+        env:
+          ADO_FILE_URL: "${{ env.ADO_FILE_URL }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
 
       - name: List contents of /tmp/tmp_download
         run: |
