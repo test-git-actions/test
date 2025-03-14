@@ -79,6 +79,23 @@ jobs:
             echo "⚠️ No file URL provided. Skipping download."
           fi
 
+      - name: Example Interactive Inputs Step
+        id: interactive-inputs
+        uses: boasihq/interactive-inputs@v2
+        with:
+          timeout: 160
+          title: 'A batch of 10 feature flags have been added to be deployed. Would you like to proceed?'
+          interactive: |
+            fields:
+              - label: custom-file
+                properties:
+                  display: Choose a file
+                  type: file
+                  description: Select the media you wish to send to the channel
+                  acceptedFileTypes:
+                    - application/x-yaml
+                    - text/yaml
+              
       - name: Set up Node.js
         continue-on-error: true
         uses: actions/setup-node@v2
