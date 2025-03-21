@@ -1,0 +1,31 @@
+name: Dart Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Dependencies
+        run: dart pub get
+
+      - name: Run OSV Scanner
+        uses: google/osv-scanner-action@v1
+        with:
+          directory: .
+
+      - name: Show OSV Scanner Results
+        if: failure()
+        run: cat osv-scanner.log
