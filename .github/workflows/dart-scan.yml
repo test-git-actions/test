@@ -21,10 +21,14 @@ jobs:
       - name: Install Dependencies
         run: dart pub get
 
+      - name: Install OSV Scanner
+        run: |
+          curl -sSL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -o osv-scanner
+          chmod +x osv-scanner
+          sudo mv osv-scanner /usr/local/bin/
+
       - name: Run OSV Scanner
-        uses: google/osv-scanner-action@v1
-        with:
-          directory: .
+        run: osv-scanner --lockfile=pubspec.lock
 
       - name: Show OSV Scanner Results
         if: failure()
