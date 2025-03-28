@@ -16,6 +16,7 @@ jobs:
         id: extract-duration
         run: |
           case "${{ github.event.client_payload.schedule_duration }}" in
+            "2 minutes")   INTERVAL=600 ;;
             "10 minutes")   INTERVAL=600 ;;
             "30 minutes")   INTERVAL=1800 ;;
             "60 minutes")   INTERVAL=3600 ;;
