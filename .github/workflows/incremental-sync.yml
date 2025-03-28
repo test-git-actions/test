@@ -41,7 +41,7 @@ jobs:
       - name: Reschedule Workflow
         if: env.INTERVAL != '0'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT }}
         run: |
           echo "Re-triggering workflow in $INTERVAL seconds..."
           sleep $INTERVAL
