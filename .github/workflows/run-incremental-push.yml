@@ -31,8 +31,8 @@ jobs:
             client-payload: |
                 {
                   "src_org": "MGMResorts",
-                  "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}"
-                  "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"
+                  "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}",
+                  "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
                   "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
                 }
 
