@@ -20,7 +20,7 @@ on:
 
 concurrency:
   group: incremental-sync-${{ github.event.inputs.repo_name || github.event.client_payload.repo_name }}
-  cancel-in-progress: true
+  cancel-in-progress: true # new workflows will cancel any currently running workflow with the same repo_name before starting a new one.
 
 jobs:
   sync:
