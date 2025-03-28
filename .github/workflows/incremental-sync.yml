@@ -16,7 +16,7 @@ jobs:
         id: extract-duration
         run: |
           case "${{ github.event.client_payload.schedule_duration }}" in
-            "2 minutes")   INTERVAL=600 ;;
+            "2 minutes")   INTERVAL=120 ;;
             "10 minutes")   INTERVAL=600 ;;
             "30 minutes")   INTERVAL=1800 ;;
             "60 minutes")   INTERVAL=3600 ;;
@@ -47,4 +47,5 @@ jobs:
           sleep $INTERVAL
           gh api repos/:owner/:repo/actions/workflows/incremental-sync.yml/dispatches \
             -f ref=main \
-            -F inputs='{}'
+            -F inputs='{}' \
+            --header "Authorization: token $GH_TOKEN"
