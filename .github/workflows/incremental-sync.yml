@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "Re-triggering workflow in $INTERVAL seconds..."
           sleep $INTERVAL
-          gh api repos/:owner/:repo/actions/workflows/incremental-sync.yml/dispatches \
+          gh api repos/${{ github.repository_owner }}/${{ github.event.client_payload.repo_name }}/actions/workflows/incremental-sync.yml/dispatches \
             -f ref=main \
             -F inputs='{}' \
             --header "Authorization: token $GH_TOKEN"
