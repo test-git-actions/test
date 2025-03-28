@@ -2,8 +2,6 @@ name: Incremental GitHub Sync
 
 on:
   workflow_dispatch:  # Allows manual execution
-  repository_dispatch:
-    types: [incremental-push]  # Runs on incremental push event
     inputs:
       target_org:
         description: 'Target Organization'
@@ -17,6 +15,8 @@ on:
         description: 'Schedule Duration'
         required: true
         default: '24 hours'
+  repository_dispatch:
+    types: [incremental-push]
 
 jobs:
   sync:
