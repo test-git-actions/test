@@ -39,6 +39,7 @@ body:
       label: Schedule duration
       description: Please select the schedular duration
       options:
+        - 2 minutes
         - 10 minutes
         - 30 minutes
         - 60 minutes
