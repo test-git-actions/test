@@ -66,7 +66,7 @@ jobs:
           SCHEDULE_DURATION: ${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}
         run: |
           echo "Re-triggering workflow in $INTERVAL seconds..."
-          sleep 20 #$INTERVAL
+          sleep $INTERVAL
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
