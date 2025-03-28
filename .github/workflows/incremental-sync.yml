@@ -1,0 +1,49 @@
+name: Incremental GitHub Sync
+
+on:
+  workflow_dispatch:  # Allows manual execution
+  repository_dispatch:
+    types: [incremental-push]  # Runs on incremental push event
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Extract Schedule Duration
+        id: extract-duration
+        run: |
+          case "${{ github.event.client_payload.schedule_duration }}" in
+            "10 minutes")   INTERVAL=600 ;;
+            "30 minutes")   INTERVAL=1800 ;;
+            "60 minutes")   INTERVAL=3600 ;;
+            "2 hours")      INTERVAL=7200 ;;
+            "4 hours")      INTERVAL=14400 ;;
+            "8 hours")      INTERVAL=28800 ;;
+            "24 hours")     INTERVAL=86400 ;;
+            *)              INTERVAL=0 ;;  # Default to immediate execution
+          esac
+          echo "INTERVAL=$INTERVAL" >> $GITHUB_ENV
+
+      - name: Run Sync Script
+        env:
+          GITHUB_SOURCE_TOKEN: ${{ secrets.SOURCE_ADMIN_TOKEN }}
+          GITHUB_DEST_TOKEN: ${{ secrets.TARGET_ADMIN_TOKEN }}
+          TARGET_ORG: ${{ github.event.client_payload.target_org }}
+          REPO_NAME: ${{ github.event.client_payload.repo_name }}
+        run: |
+          echo "Syncing repository: $REPO_NAME in organization: $TARGET_ORG"
+          bash ./.github/scripts/github_migrate.sh "$TARGET_ORG/$REPO_NAME"
+
+      - name: Reschedule Workflow
+        if: env.INTERVAL != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Re-triggering workflow in $INTERVAL seconds..."
+          sleep $INTERVAL
+          gh api repos/:owner/:repo/actions/workflows/incremental-sync.yml/dispatches \
+            -f ref=main \
+            -F inputs='{}'
