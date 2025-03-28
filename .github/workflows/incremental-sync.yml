@@ -4,6 +4,19 @@ on:
   workflow_dispatch:  # Allows manual execution
   repository_dispatch:
     types: [incremental-push]  # Runs on incremental push event
+    inputs:
+      target_org:
+        description: 'Target Organization'
+        required: true
+        default: 'mgmri-commerce'
+      repo_name:
+        description: 'Repository Name'
+        required: true
+        default: 'example-repo'
+      schedule_duration:
+        description: 'Schedule Duration'
+        required: true
+        default: '24 hours'
 
 jobs:
   sync:
@@ -12,10 +25,16 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
+      - name: Print Inputs
+        run: |
+          echo "Target Organization: ${{ github.event.inputs.target_org || github.event.inputs.target_org }}"
+          echo "Repository Name: ${{ github.event.inputs.repo_name || github.event.inputs.repo_name }}"
+          echo "Schedule Duration: ${{ github.event.inputs.schedule_duration || github.event.inputs.schedule_duration }}"
+
       - name: Extract Schedule Duration
         id: extract-duration
         run: |
-          case "${{ github.event.client_payload.schedule_duration }}" in
+          case "${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}" in
             "2 minutes")   INTERVAL=120 ;;
             "10 minutes")   INTERVAL=600 ;;
             "30 minutes")   INTERVAL=1800 ;;
@@ -32,8 +51,8 @@ jobs:
       #   env:
       #     GITHUB_SOURCE_TOKEN: ${{ secrets.SOURCE_ADMIN_TOKEN }}
       #     GITHUB_DEST_TOKEN: ${{ secrets.TARGET_ADMIN_TOKEN }}
-      #     TARGET_ORG: ${{ github.event.client_payload.target_org }}
-      #     REPO_NAME: ${{ github.event.client_payload.repo_name }}
+      #     TARGET_ORG: ${{ github.event.client_payload.target_org || github.event.inputs.target_org }}
+      #     REPO_NAME: ${{ github.event.client_payload.repo_name || github.event.inputs.repo_name }}
       #   run: |
       #     echo "Syncing repository: $REPO_NAME in organization: $TARGET_ORG"
       #     bash ./.github/scripts/github_migrate.sh "$TARGET_ORG/$REPO_NAME"
@@ -42,10 +61,13 @@ jobs:
         if: env.INTERVAL != '0'
         env:
           GH_TOKEN: ${{ secrets.PAT }}
+          TARGET_ORG: ${{ github.event.client_payload.target_org || github.event.inputs.target_org }}
+          REPO_NAME: ${{ github.event.client_payload.repo_name || github.event.inputs.repo_name }}
+          SCHEDULE_DURATION: ${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}
         run: |
           echo "Re-triggering workflow in $INTERVAL seconds..."
           sleep $INTERVAL
-          gh api repos/${{ github.repository_owner }}/${{ github.event.client_payload.repo_name }}/actions/workflows/incremental-sync.yml/dispatches \
+          gh api repos/${{ github.repository_owner }}/${{ github.repository }}/actions/workflows/incremental-sync.yml/dispatches \
             -f ref=main \
-            -F inputs='{}' \
-            --header "Authorization: token $GH_TOKEN"
+            -F inputs="{\"target_org\":\"${{ env.TARGET_ORG }}\", \"repo_name\":\"${{ env.REPO_NAME }}\", \"schedule_duration\":\"${{ env.SCHEDULE_DURATION }}\"}" \
+
