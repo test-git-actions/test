@@ -26,6 +26,7 @@ jobs:
       - name: Run Incremental Push
         uses: peter-evans/repository-dispatch@v1
         with:
+            token: ${{ secrets.GITHUB_TOKEN }}
             event-type: incremental-push
             client-payload: |
                 {
