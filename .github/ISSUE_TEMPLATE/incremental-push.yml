@@ -1,0 +1,51 @@
+name: Incremental Push
+description: Incremental push from source to target
+title: "Incremental Push"
+labels: ["incremental-push"]
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Repository Name
+      description: Please enter the repository name
+      placeholder: your-repository
+    validations:
+      required: true
+  - type: dropdown
+    id: organization
+    attributes:
+      label: Target Organization
+      description: Please select the Target Organization
+      options:
+        - mgmri-commerce
+        - mgmri-dge
+        - mgmri-source
+        - mgmri-ciam
+        - Core
+        - mgmri-corp
+        - mgmri-data
+        - mgmri-eiam
+        - mgmri-entertainment
+        - mgmri-gaming
+        - mgmri-hotel
+        - mgmri-secops
+        - mgmri-shared
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: schedule_duration
+    attributes:
+      label: Schedule duration
+      description: Please select the schedular duration
+      options:
+        - 10 minutes
+        - 30 minutes
+        - 60 minutes
+        - 2 hours
+        - 4 hours
+        - 8 hours
+        - 24 hours
+
+    validations:
+      required: true
