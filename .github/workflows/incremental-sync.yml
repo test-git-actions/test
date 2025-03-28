@@ -66,10 +66,10 @@ jobs:
           SCHEDULE_DURATION: ${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}
         run: |
           echo "Re-triggering workflow in $INTERVAL seconds..."
-          sleep $INTERVAL
+          sleep 30 #$INTERVAL
           gh api repos/${{ github.repository }}/actions/workflows/incremental-sync.yml/dispatches \
             -f ref=main \
-            -F target_org="${{ env.TARGET_ORG }}" \
-            -F repo_name="${{ env.REPO_NAME }}" \
-            -F schedule_duration="${{ env.SCHEDULE_DURATION }}" \
-            --header "Authorization: token $GH_TOKEN"
+            --header "Authorization: token $GH_TOKEN" \
+            -F inputs.target_org="${{ env.TARGET_ORG }}" \
+            -F inputs.repo_name="${{ env.REPO_NAME }}" \
+            -F inputs.schedule_duration="${{ env.SCHEDULE_DURATION }}"
