@@ -18,6 +18,10 @@ on:
   repository_dispatch:
     types: [incremental-push]
 
+concurrency:
+  group: incremental-sync-${{ github.event.inputs.repo_name || github.event.client_payload.repo_name }}
+  cancel-in-progress: true
+
 jobs:
   sync:
     runs-on: ubuntu-latest
