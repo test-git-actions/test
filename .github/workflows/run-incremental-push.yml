@@ -45,8 +45,8 @@ jobs:
       - name: Modify Workflow File
         run: |
           sed -i 's#cron: ".*"#cron: "${{ env.CRON }}"#' .github/workflows/incremental-sync-job.yml
-          sed -i 's/name: .*/name: "Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' .github/workflows/incremental-sync-job.yml
-        
+          sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' .github/workflows/incremental-sync-job.yml
+          
       - name: Commit and Push Changes
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
