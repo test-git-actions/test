@@ -46,6 +46,8 @@ jobs:
           sed -i "s/name: .*/name: \"Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }} - (${{ env.CRON }})\"/" .github/workflows/incremental-sync-job.yml
 
       - name: Commit and Push Changes
+        env:
+          GH_PAT: ${{ secrets.GT_PAT }}
         run: |
            git config --global user.name "github-actions[bot]"
            git config --global user.email "github-actions[bot]@users.noreply.github.com"
