@@ -1,0 +1,22 @@
+name: Incremental GitHub Sync - JOB Schedular
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs once every 24 hours
+  workflow_dispatch:  # Allows manual execution
+  repository_dispatch:
+    types: [incremental-push-job]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      # - name: Run Sync Script
+      #   env:
+      #     GITHUB_SOURCE_TOKEN: ${{ secrets.GITHUB_SOURCE_TOKEN }}
+      #     GITHUB_DEST_TOKEN: ${{ secrets.GITHUB_DEST_TOKEN }}
+      #   run: |
+      #     bash ./.github/scipts/github_migrate.sh
