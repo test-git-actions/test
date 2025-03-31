@@ -20,11 +20,10 @@ jobs:
           
       - name: "Incremental GitHub Sync - test"
         env:
-          GITHUB_SOURCE_TOKEN: ${{ secrets.SOURCE_ADMIN_TOKEN }}
-          GITHUB_DEST_TOKEN: ${{ secrets.TARGET_ADMIN_TOKEN }}
+          GITHUB_SOURCE_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_DEST_TOKEN: ${{ secrets.GH_PAT }}
           TARGET_ORG: ${{ github.event.client_payload.target_org }}
           REPO_NAME: ${{ github.event.client_payload.repo_name }}
+          SOURCE_ORG: test-git-actions
         run: |
-          bash ./.github/scripts/github_migrate.sh \
-            --target-org "${TARGET_ORG}" \
-            --repo-name "${REPO_NAME}"
+          bash ./.github/scripts/github_migrate.sh
