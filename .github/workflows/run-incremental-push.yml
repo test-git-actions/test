@@ -7,7 +7,7 @@ permissions:
   contents: write
   actions: write
   pull-requests: write
-  workflows: write
+  issues: write
 
 jobs:
   secrets_variables_migration:
