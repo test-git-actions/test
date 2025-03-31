@@ -23,11 +23,40 @@ jobs:
         env:
           JSON_STRING: ${{ steps.parse-issue-body.outputs.jsonString }}
 
-      - name: Run Incremental Push
+      - name: Extract Schedule Cron Expression
+        id: extract-cron
+        run: |
+          case "${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}" in
+            "2 minutes")   CRON="*/2 * * * *" ;;
+            "10 minutes")  CRON="*/10 * * * *" ;;
+            "30 minutes")  CRON="*/30 * * * *" ;;
+            "60 minutes")  CRON="0 * * * *" ;;  # Every hour
+            "2 hours")     CRON="0 */2 * * *" ;;
+            "4 hours")     CRON="0 */4 * * *" ;;
+            "8 hours")     CRON="0 */8 * * *" ;;
+            "24 hours")    CRON="0 0 * * *" ;;  # Midnight every day
+            *)             CRON="*" ;;  # Default to every second
+          esac
+          echo "CRON=$CRON" >> $GITHUB_ENV
+
+      - name: Modify Workflow File
+        run: |
+          sed -i "s/cron: \".*\"/cron: \"${{ env.CRON }}\"/" .github/workflows/incremental-sync-job.yml
+          sed -i "s/name: .*/name: \"Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }} - (${{ env.CRON }})\"/" .github/workflows/incremental-sync-job.yml
+
+      - name: Commit and Push Changes
+        run: |
+           git config --global user.name "github-actions[bot]"
+           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+           git add .github/workflows/incremental-sync-job.yml
+           git commit -m "Updated cron schedule to ${{ github.event.inputs.new_cron }}"
+           git push
+
+      - name: Schedule the Job - Incremental Push
         uses: peter-evans/repository-dispatch@v1
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
-            event-type: incremental-push
+            event-type: incremental-push-job
             client-payload: |
                 {
                   "src_org": "MGMResorts",
@@ -35,6 +64,19 @@ jobs:
                   "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
                   "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
                 }
+
+      # - name: Run Incremental Push
+      #   uses: peter-evans/repository-dispatch@v1
+      #   with:
+      #       token: ${{ secrets.GITHUB_TOKEN }}
+      #       event-type: incremental-push
+      #       client-payload: |
+      #           {
+      #             "src_org": "MGMResorts",
+      #             "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}",
+      #             "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
+      #             "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
+      #           }
 
             
             
