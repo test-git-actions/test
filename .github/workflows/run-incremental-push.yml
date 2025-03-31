@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out scripts
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
 
       - name: Parse issue body
         id: parse-issue-body
