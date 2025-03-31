@@ -3,7 +3,7 @@
 # Configuration
 SOURCE_GITHUB="https://$GITHUB_SOURCE_TOKEN@github.com/$SOURCE_ORG"
 DEST_GITHUB="https://$GITHUB_DEST_TOKEN@github.com/$TARGET_ORG"
-REPO_NAME="mgm_ssdlc_components"
+# REPO_NAME="$REPO_NAME"
 MIRROR_DIR="/tmp/$REPO_NAME"
 
 # Logging
