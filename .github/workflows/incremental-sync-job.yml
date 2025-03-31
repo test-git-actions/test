@@ -36,6 +36,7 @@ jobs:
           echo "Source Organization: $SOURCE_ORG"
 
       - name: Run Sync Script
+        continue-on-error: true
         env:
           GITHUB_SOURCE_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_DEST_TOKEN: ${{ secrets.GH_PAT }}
