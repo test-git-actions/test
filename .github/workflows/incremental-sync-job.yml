@@ -10,10 +10,10 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name:  Checkout this repo
+      - name: "Incremental GitHub Sync - test"
         uses: actions/checkout@v4
 
-      - name: Print Inputs
+      - name: "Incremental GitHub Sync - test"
         run: |
           echo "Target Organization: ${{ github.event.client_payload.target_org }}"
           echo "Repository Name: ${{ github.event.client_payload.repo_name }}"
