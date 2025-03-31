@@ -2,40 +2,42 @@ name: "Incremental GitHub Sync - test"
 
 on:
   schedule:
-    - cron: "*/2 * * * *"
+    - cron: "*/2 * * * *"  # Runs every 2 minutes
   workflow_dispatch:
     inputs:
-        target_org:
-          description: 'Target Organization'
-          required: true
-          default: 'mgmri-commerce'
-        repo_name:
-          description: 'Repository Name'
-          required: true
-          default: 'example-repo'
-        source_org:
-          description: 'Repository Name'
-          required: true
-          default: 'MGMResorts'
-          
+      target_org:
+        description: "Target Organization"
+        required: true
+        default: "mgmri-commerce"
+      repo_name:
+        description: "Repository Name"
+        required: true
+        default: "example-repo"
+      source_org:
+        description: "Source Organization"
+        required: true
+        default: "MGMResorts"
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      TARGET_ORG: ${{ github.event.inputs.target_org || 'mgmri-commerce' }}
+      REPO_NAME: ${{ github.event.inputs.repo_name || 'example-repo' }}
+      SOURCE_ORG: ${{ github.event.inputs.source_org || 'MGMResorts' }}
     steps:
       - name: "Checkout action"
         uses: actions/checkout@v4
 
       - name: "Print the client payload"
         run: |
-          echo "Target Organization: ${{ github.event.inputs.target_org }}"
-          echo "Repository Name: ${{ github.event.inputs.repo_name }}"
-          
+          echo "Target Organization: $TARGET_ORG"
+          echo "Repository Name: $REPO_NAME"
+          echo "Source Organization: $SOURCE_ORG"
+
       - name: Run Sync Script
         env:
           GITHUB_SOURCE_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_DEST_TOKEN: ${{ secrets.GH_PAT }}
-          TARGET_ORG: ${{ github.event.inputs.target_org }}
-          REPO_NAME: ${{ github.event.inputs.repo_name }}
-          SOURCE_ORG: test-git-actions
         run: |
           bash ./.github/scripts/github_migrate.sh
