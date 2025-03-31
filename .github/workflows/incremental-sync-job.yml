@@ -1,8 +1,8 @@
-name: Incremental GitHub Sync - JOB Schedular
+name: "Incremental GitHub Sync - test - (*)"
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # Runs once every 24 hours
+    - cron: "*"  # Runs once every 24 hours
   workflow_dispatch:  # Allows manual execution
   repository_dispatch:
     types: [incremental-push-job]
@@ -11,10 +11,10 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout this repo
+      - name: "Incremental GitHub Sync - test - (*)"
         uses: actions/checkout@v4
 
-      # - name: Run Sync Script
+      # - name: "Incremental GitHub Sync - test - (*)"
       #   env:
       #     GITHUB_SOURCE_TOKEN: ${{ secrets.GITHUB_SOURCE_TOKEN }}
       #     GITHUB_DEST_TOKEN: ${{ secrets.GITHUB_DEST_TOKEN }}
