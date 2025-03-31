@@ -51,12 +51,20 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-           git config --global user.name "github-actions[bot]"
-           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-           git pull
-           git add .github/workflows/incremental-sync-job.yml || git add .
-           git commit -m "Updated cron schedule to ${{ env.CRON }}"
-           git push
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git fetch origin
+            git status
+        
+            # Check if there are any changes to commit
+            if [[ -n "$(git status --porcelain)" ]]; then
+              git add .
+              git commit -m "Automated commit by GitHub Actions"
+              git push
+            else
+              echo "No changes detected. Exiting."
+              exit 0  # Exit with code 0 to indicate no error
+            fi
 
       - name: Schedule the Job - Incremental Push
         uses: peter-evans/repository-dispatch@v1
