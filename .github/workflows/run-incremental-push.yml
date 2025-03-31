@@ -45,7 +45,7 @@ jobs:
       - name: Modify Workflow File
         run: |
           sed -i 's#cron: ".*"#cron: "${{ env.CRON }}"#' .github/workflows/incremental-sync-job.yml
-          sed -i 's/name: .*/name: "Incremental GitHub Sync - test"/' .github/workflows/incremental-sync-job.yml
+          sed -i 's/name: .*/name: "Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' .github/workflows/incremental-sync-job.yml
         
       - name: Commit and Push Changes
         env:
@@ -78,20 +78,4 @@ jobs:
                   "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
                   "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
                 }
-
-      # - name: Run Incremental Push
-      #   uses: peter-evans/repository-dispatch@v1
-      #   with:
-      #       token: ${{ secrets.GITHUB_TOKEN }}
-      #       event-type: incremental-push
-      #       client-payload: |
-      #           {
-      #             "src_org": "MGMResorts",
-      #             "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}",
-      #             "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
-      #             "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
-      #           }
-
-            
-            
 
