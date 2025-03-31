@@ -75,7 +75,7 @@ jobs:
             /repos/${{ github.repository }}/actions/workflows/incremental-sync-job.yml/dispatches \
             -f ref=main \
             -f "inputs[target_org]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}" \
-            -f "inputs[source_org]="MGMResorts" \
+            -f "inputs[source_org]=MGMResorts" \
             -f "inputs[repo_name]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}" \
             --header "Authorization: token $GH_TOKEN"
 
