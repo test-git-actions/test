@@ -4,9 +4,16 @@ on:
   schedule:
     - cron: "*/2 * * * *"
   workflow_dispatch:
-  # repository_dispatch:
-  #   types: [incremental-push-job]
-
+    inputs:
+        target_org:
+          description: 'Target Organization'
+          required: true
+          default: 'mgmri-commerce'
+        repo_name:
+          description: 'Repository Name'
+          required: true
+          default: 'example-repo'
+          
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -16,15 +23,15 @@ jobs:
 
       - name: "Print the client payload"
         run: |
-          echo "Target Organization: ${{ github.event.client_payload.target_org }}"
-          echo "Repository Name: ${{ github.event.client_payload.repo_name }}"
+          echo "Target Organization: ${{ github.event.inputs.target_org }}"
+          echo "Repository Name: ${{ github.event.inputs.repo_name }}"
           
       - name: Run Sync Script
         env:
           GITHUB_SOURCE_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_DEST_TOKEN: ${{ secrets.GH_PAT }}
-          TARGET_ORG: ${{ github.event.client_payload.target_org }}
-          REPO_NAME: ${{ github.event.client_payload.repo_name }}
+          TARGET_ORG: ${{ github.event.inputs.target_org }}
+          REPO_NAME: ${{ github.event.inputs.repo_name }}
           SOURCE_ORG: test-git-actions
         run: |
           bash ./.github/scripts/github_migrate.sh
