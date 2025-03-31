@@ -10,7 +10,7 @@ permissions:
   issues: write
 
 jobs:
-  secrets_variables_migration:
+  incremental_push:
     runs-on: ubuntu-latest
     steps:
       - name: Check out scripts
