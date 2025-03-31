@@ -29,7 +29,7 @@ jobs:
       - name: Extract Schedule Cron Expression
         id: extract-cron
         run: |
-          case "${{ github.event.client_payload.schedule_duration || github.event.inputs.schedule_duration }}" in
+          case "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}" in
             "2 minutes")   CRON="*/2 * * * *" ;;
             "10 minutes")  CRON="*/10 * * * *" ;;
             "30 minutes")  CRON="*/30 * * * *" ;;
@@ -38,7 +38,7 @@ jobs:
             "4 hours")     CRON="0 */4 * * *" ;;
             "8 hours")     CRON="0 */8 * * *" ;;
             "24 hours")    CRON="0 0 * * *" ;;  # Midnight every day
-            *)             CRON="*" ;;  # Default to every second
+            *)             CRON="0 0 * * *" ;;  # Midnight every day
           esac
           echo "CRON=$CRON" >> $GITHUB_ENV
 
