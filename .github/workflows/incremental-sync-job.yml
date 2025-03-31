@@ -2,8 +2,7 @@ name: "Incremental GitHub Sync - test"
 
 on:
   schedule:
-    - cron: "*/10 * * * *"  # Runs once every 24 hours
-  workflow_dispatch:  # Allows manual execution
+    - cron: "*/10 * * * *"
   repository_dispatch:
     types: [incremental-push-job]
 
@@ -11,12 +10,21 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: "Incremental GitHub Sync - test"
+      - name:  Checkout this repo
         uses: actions/checkout@v4
 
-      # - name: "Incremental GitHub Sync - test"
-      #   env:
-      #     GITHUB_SOURCE_TOKEN: ${{ secrets.GITHUB_SOURCE_TOKEN }}
-      #     GITHUB_DEST_TOKEN: ${{ secrets.GITHUB_DEST_TOKEN }}
-      #   run: |
-      #     bash ./.github/scipts/github_migrate.sh
+      - name: Print Inputs
+        run: |
+          echo "Target Organization: ${{ github.event.client_payload.target_org }}"
+          echo "Repository Name: ${{ github.event.client_payload.repo_name }}"
+          
+      - name: "Incremental GitHub Sync - test"
+        env:
+          GITHUB_SOURCE_TOKEN: ${{ secrets.SOURCE_ADMIN_TOKEN }}
+          GITHUB_DEST_TOKEN: ${{ secrets.TARGET_ADMIN_TOKEN }}
+          TARGET_ORG: ${{ github.event.client_payload.target_org }}
+          REPO_NAME: ${{ github.event.client_payload.repo_name }}
+        run: |
+          bash ./.github/scripts/github_migrate.sh \
+            --target-org "${TARGET_ORG}" \
+            --repo-name "${REPO_NAME}"
