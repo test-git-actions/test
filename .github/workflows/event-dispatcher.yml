@@ -11,8 +11,7 @@ permissions:
   issues: write
   actions: write
   pull-requests: write
-  workflows: write
-
+  
 jobs:
   dispatch-incremental-push:
     if: contains(github.event.issue.labels.*.name, 'incremental-push')
