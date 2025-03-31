@@ -3,6 +3,7 @@ name: "Incremental GitHub Sync - test"
 on:
   schedule:
     - cron: "*/2 * * * *"  # Runs every 2 minutes
+  repository_dispatch:
   workflow_dispatch:
     inputs:
       target_org:
