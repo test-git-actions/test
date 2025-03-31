@@ -10,15 +10,15 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: "Incremental GitHub Sync - test"
+      - name: "Checkout action"
         uses: actions/checkout@v4
 
-      - name: "Incremental GitHub Sync - test"
+      - name: "Print the client payload"
         run: |
           echo "Target Organization: ${{ github.event.client_payload.target_org }}"
           echo "Repository Name: ${{ github.event.client_payload.repo_name }}"
           
-      - name: "Incremental GitHub Sync - test"
+      - name: Run Sync Script
         env:
           GITHUB_SOURCE_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_DEST_TOKEN: ${{ secrets.GH_PAT }}
