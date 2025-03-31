@@ -2,7 +2,7 @@ name: "Incremental GitHub Sync - test"
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/2 * * * *"
   workflow_dispatch:
   repository_dispatch:
     types: [incremental-push-job]
