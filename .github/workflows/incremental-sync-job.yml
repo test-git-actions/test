@@ -4,8 +4,8 @@ on:
   schedule:
     - cron: "*/2 * * * *"
   workflow_dispatch:
-  repository_dispatch:
-    types: [incremental-push-job]
+  # repository_dispatch:
+  #   types: [incremental-push-job]
 
 jobs:
   sync:
