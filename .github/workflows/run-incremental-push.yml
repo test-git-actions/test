@@ -66,31 +66,31 @@ jobs:
               exit 0  # Exit with code 0 to indicate no error
             fi
 
-      # - name: Trigger Incremental GitHub Sync workflow
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_PAT }}
-      #   run: |
-      #     gh api \
-      #       --method POST \
-      #       -H "Accept: application/vnd.github+json" \
-      #       -H "X-GitHub-Api-Version: 2022-11-28" \
-      #       /repos/${{ github.repository }}/actions/workflows/incremental-sync-job.yml/dispatches \
-      #       -f ref=main \
-      #       -f "inputs[target_org]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}" \
-      #       -f "inputs[source_org]=MGMResorts" \
-      #       -f "inputs[repo_name]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}" \
-      #       --header "Authorization: token $GH_TOKEN"
+      - name: Trigger Incremental GitHub Sync workflow
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/workflows/incremental-sync-job.yml/dispatches \
+            -f ref=main \
+            -f "inputs[target_org]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}" \
+            -f "inputs[source_org]=MGMResorts" \
+            -f "inputs[repo_name]=${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}" \
+            --header "Authorization: token $GH_TOKEN"
 
-      - name: Schedule the Job - Incremental Push
-        uses: peter-evans/repository-dispatch@v1
-        with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            event-type: incremental-push-job
-            client-payload: |
-                {
-                  "src_org": "MGMResorts",
-                  "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}",
-                  "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
-                  "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
-                }
+      # - name: Schedule the Job - Incremental Push
+      #   uses: peter-evans/repository-dispatch@v1
+      #   with:
+      #       token: ${{ secrets.GITHUB_TOKEN }}
+      #       event-type: incremental-push-job
+      #       client-payload: |
+      #           {
+      #             "src_org": "MGMResorts",
+      #             "target_org": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}",
+      #             "repo_name": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}",
+      #             "schedule_duration": "${{ fromJson(steps.parse-issue-body.outputs.jsonString).schedule_duration }}"
+      #           }
 
