@@ -67,6 +67,8 @@ jobs:
             fi
 
       - name: Trigger Incremental GitHub Sync workflow
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh api \
             --method POST \
