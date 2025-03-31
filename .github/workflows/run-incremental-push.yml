@@ -51,7 +51,8 @@ jobs:
         run: |
            git config --global user.name "github-actions[bot]"
            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-           git add .github/workflows/incremental-sync-job.yml
+           git pull
+           git add .github/workflows/incremental-sync-job.yml || git add .
            git commit -m "Updated cron schedule to ${{ github.event.inputs.new_cron }}"
            git push
 
