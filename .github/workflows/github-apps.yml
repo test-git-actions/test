@@ -1,7 +1,7 @@
 name: "Extract Org and Fetch GitHub Data"
+
 on:
-  issues:
-    types: [opened, edited]
+  workflow_call:
 
 env:
   BASE_GITHUB_API_URL: "https://api.github.com"
