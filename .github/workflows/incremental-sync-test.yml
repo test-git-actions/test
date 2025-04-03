@@ -21,5 +21,4 @@ jobs:
           GITHUB_SOURCE_TOKEN: ${{ secrets.SOURCE_ADMIN_TOKEN }}
           GITHUB_DEST_TOKEN: ${{ secrets.TARGET_ADMIN_TOKEN }}
         run: |
-          # echo "REPO_NAME=booking-room-resv-addons" >> $GITHUB_ENV
           bash ./.github/scripts/github_migrate.sh
