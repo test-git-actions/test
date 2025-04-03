@@ -18,4 +18,4 @@ jobs:
           workflow: incremental-sync-test.yml  # Specify the target workflow file
           cron: "*/5 * * * *"  # Set the new cron schedule, for example every 5 minutes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
