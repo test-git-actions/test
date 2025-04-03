@@ -1,0 +1,21 @@
+name: "Update Cron Schedule"
+
+on:
+  push:
+    branches:
+      - main  # Trigger when changes are pushed to the main branch
+
+jobs:
+  update-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Set the new cron schedule
+        uses: gr2m/set-cron-schedule-action@v2.0.2
+        with:
+          workflow: incremental-sync-test.yml  # Specify the target workflow file
+          cron: "*/5 * * * *"  # Set the new cron schedule, for example every 5 minutes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
