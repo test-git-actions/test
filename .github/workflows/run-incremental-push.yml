@@ -67,6 +67,15 @@ jobs:
 
             # Copy the new script if it exists
             if [ -f "../$script_file" ]; then
+              cp "../$script_file" ".github/scripts/"
+              git add ".github/scripts/github_migrate.sh"
+            else
+              echo "Error: $script_file not found!" >&2
+              exit 1
+            fi
+
+            # Copy the workflow file
+            if [ -f "../$workflow_file" ]; then
               tmp_file=$(mktemp)  # Create a temp file
               cp "../$workflow_file" "$tmp_file"
 
@@ -83,15 +92,6 @@ jobs:
 
               # Remove temp file
               rm "$tmp_file"
-            else
-              echo "Error: $script_file not found!" >&2
-              exit 1
-            fi
-
-            # Copy the workflow file
-            if [ -f "../$workflow_file" ]; then
-              cp "../$workflow_file" ".github/workflows/"
-              git add ".github/workflows/incremental_push.yml"
             else
               echo "Error: $workflow_file not found!" >&2
               exit 1
