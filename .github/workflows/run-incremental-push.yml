@@ -45,8 +45,8 @@ jobs:
       - name: Modify Workflow File
         env:
           SOURCE_ORG: test-git-actions
-          REPO_NAME: fromJson(steps.parse-issue-body.outputs.jsonString).repository_name
-          TARGET_ORG: fromJson(steps.parse-issue-body.outputs.jsonString).target_organization
+          REPO_NAME: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}
+          TARGET_ORG: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}
         run: |
             script_file=".github/scripts/github_migrate.sh"
             workflow_file=".github/workflows/incremental_push.yml"
