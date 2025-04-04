@@ -81,9 +81,9 @@ jobs:
 
               # Apply sed modifications on the temp file only
               sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ env.REPO_NAME }}"/' "$tmp_file"          
-              sed -i "s/TARGET_ORG: \"\"/TARGET_ORG: \"${TARGET_ORG}\"/" "$tmp_file"
-              sed -i "s/REPO_NAME: \"\"/REPO_NAME: \"${REPO_NAME}\"/" "$tmp_file"
-              sed -i "s/SOURCE_ORG: \"\"/SOURCE_ORG: \"${SOURCE_ORG}\"/" "$tmp_file"
+              perl -pi -e "s/TARGET_ORG: \"\"/TARGET_ORG: \"${TARGET_ORG}\"/" "$tmp_file"
+              perl -pi -e "s/REPO_NAME: \"\"/REPO_NAME: \"${REPO_NAME}\"/" "$tmp_file"
+              perl -pi -e "s/SOURCE_ORG: \"\"/SOURCE_ORG: \"${SOURCE_ORG}\"/" "$tmp_file"
 
               # Copy modified temp file to the repo without modifying the original
               cp "$tmp_file" ".github/workflows/incremental_push.yml"
