@@ -43,46 +43,93 @@ jobs:
           echo "CRON=$CRON" >> $GITHUB_ENV
 
       - name: Modify Workflow File
-        run: |
-          # sed -i 's#cron: ".*"#cron: "${{ env.CRON }}"#' .github/workflows/incremental-sync-job.yml
-          # sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' .github/workflows/incremental-sync-job.yml
-
-          # Define variables
-          TEMPLATE_FILE=".github/workflows/schedule/template.yml"
-          NEW_FILE=".github/workflows/schedule/incremental-sync-${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}.yml"
-          
-          # Copy template file to new workflow file
-          cp "$TEMPLATE_FILE" "$NEW_FILE"
-          
-          # Update the cron schedule dynamically in the new file
-          sed -i 's#cron: ".*"#cron: "${{ env.CRON }}"#' "$NEW_FILE"
-          
-          # Update the workflow name dynamically
-          sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' "$NEW_FILE"
-          
-          # Update environment variables in the new file
-          sed -i 's/TARGET_ORG: ""/TARGET_ORG: "${{ env.TARGET_ORG }}"/' "$NEW_FILE"
-          sed -i 's/REPO_NAME: ""/REPO_NAME: "${{ fromJson(steps.parse-issue-body.outputs.jsonString).repository_name }}"/' "$NEW_FILE"
-
-          
-      - name: Commit and Push Changes
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          SOURCE_ORG: test-git-actions
+          REPO_NAME: fromJson(steps.parse-issue-body.outputs.jsonString).repository_name
+          TARGET_ORG: fromJson(steps.parse-issue-body.outputs.jsonString).target_organization
         run: |
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-            git fetch origin
-            git status
-        
-            # Check if there are any changes to commit
-            if [[ -n "$(git status --porcelain)" ]]; then
-              git add .
-              git commit -m "Automated commit by GitHub Actions"
-              git push
+            script_file=".github/scripts/github_migrate.sh"
+            workflow_file=".github/workflows/incremental_push.yml"
+            target_git="github.com/${{ env.SOURCE_ORG }}/${{ env.REPO_NAME }}.git"
+
+            git clone --depth=1 "https://${{ secrets.GH_PAT }}@$target_git" ${{ env.REPO_NAME }}
+            cd ${{ env.REPO_NAME }}
+
+            # Ensure .github/scripts directory exists
+            mkdir -p .github/scripts
+
+            # Remove old script if it exists
+            [ -f "$script_file" ] && rm -f "$script_file"
+
+            # Configure Git locally
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+
+            # Copy the new script if it exists
+            if [ -f "../$script_file" ]; then
+              tmp_file=$(mktemp)  # Create a temp file
+              cp "../$workflow_file" "$tmp_file"
+
+              # Apply sed modifications on the temp file only
+              sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ env.REPO_NAME }}"/' "$tmp_file"          
+              sed -i 's/TARGET_ORG: ""/TARGET_ORG: "${{ env.TARGET_ORG }}"/' "$tmp_file"
+              sed -i 's/REPO_NAME: ""/REPO_NAME: "${{ env.REPO_NAME }}"/' "$tmp_file"
+
+              # Copy modified temp file to the repo without modifying the original
+              cp "$tmp_file" ".github/workflows/incremental_push.yml"
+
+              # Stage the modified file for commit
+              git add ".github/workflows/incremental_push.yml"
+
+              # Remove temp file
+              rm "$tmp_file"
             else
-              echo "No changes detected. Exiting."
-              exit 0  # Exit with code 0 to indicate no error
+              echo "Error: $script_file not found!" >&2
+              exit 1
             fi
+
+            # Copy the workflow file
+            if [ -f "../$workflow_file" ]; then
+              cp "../$workflow_file" ".github/workflows/"
+              git add ".github/workflows/incremental_push.yml"
+            else
+              echo "Error: $workflow_file not found!" >&2
+              exit 1
+            fi
+
+            # Check if there are changes before committing
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            git commit -m "Add incremental sync workflow for ${{ env.REPO_NAME }}"
+
+            # Push changes with error handling
+            if ! git push; then
+              echo "Error: Git push failed!" >&2
+              exit 1
+            fi
+
+          
+      # - name: Commit and Push Changes
+      #   env:
+      #     GH_PAT: ${{ secrets.GH_PAT }}
+      #   run: |
+      #       git config --global user.name "github-actions[bot]"
+      #       git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      #       git fetch origin
+      #       git status
+        
+      #       # Check if there are any changes to commit
+      #       if [[ -n "$(git status --porcelain)" ]]; then
+      #         git add .
+      #         git commit -m "Automated commit by GitHub Actions"
+      #         git push
+      #       else
+      #         echo "No changes detected. Exiting."
+      #         exit 0  # Exit with code 0 to indicate no error
+      #       fi
 
       # - name: Trigger Incremental GitHub Sync workflow
         # env:
