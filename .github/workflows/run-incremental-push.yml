@@ -81,6 +81,7 @@ jobs:
 
               # Apply sed modifications on the temp file only
               sed -i '0,/^name: .*/s/^name: .*/name: "Incremental GitHub Sync - ${{ env.REPO_NAME }}"/' "$tmp_file"          
+              sed -i 's#cron: ".*"#cron: "${{ env.CRON }}"#' "$tmp_file"
               perl -pi -e "s/TARGET_ORG: \"\"/TARGET_ORG: \"${TARGET_ORG}\"/" "$tmp_file"
               perl -pi -e "s/REPO_NAME: \"\"/REPO_NAME: \"${REPO_NAME}\"/" "$tmp_file"
               perl -pi -e "s/SOURCE_ORG: \"\"/SOURCE_ORG: \"${SOURCE_ORG}\"/" "$tmp_file"
