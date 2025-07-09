@@ -32,6 +32,8 @@ jobs:
         gh ado2gh --help
 
     - name: Migrate repository from ADO to GitHub
+      env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
         echo "Starting migration from Azure DevOps to GitHub..."
 
