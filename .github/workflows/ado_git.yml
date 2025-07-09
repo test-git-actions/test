@@ -62,7 +62,7 @@ jobs:
           --ado-org "${ADO_ORG}" \
           --ado-team-project "${ADO_TEAM_PROJECT}" \
           --github-org "${GITHUB_ORG}" \
-          --output migration-script.sh
+          --output migration-script.sh --verbose
     
         echo "✅ Migration script generated: migration-script.sh"
         echo "🔍 Printing script contents:"
