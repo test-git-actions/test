@@ -9,7 +9,6 @@ jobs:
 
     env:
       GH_PAT: ${{ secrets.GH_PAT }}
-      GH_TOKEN: ${{ secrets.GH_PAT }}
       ADO_PAT: ${{ secrets.AZURE_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
       ADO_TEAM_PROJECT: "Digital Ventures"
@@ -36,10 +35,15 @@ jobs:
       run: |
         echo "Starting migration from Azure DevOps to GitHub..."
 
-        echo "${ADO_PAT}" | gh auth login --with-token
-
+        # 🔥 Fix: prevent GH_TOKEN from interfering with authentication
+        unset GH_TOKEN
+        
+        # ✅ Authenticate with GH_PAT
+        echo "${GH_PAT}" | gh auth login --with-token
+        
         echo "Authenticated..."
-
+        
+        # ✅ Run migration with verbose logging
         gh ado2gh migrate-repo \
           --ado-org "${ADO_ORG}" \
           --ado-team-project "${ADO_TEAM_PROJECT}" \
@@ -47,6 +51,7 @@ jobs:
           --github-org "${GITHUB_ORG}" \
           --github-repo "${GITHUB_REPO}" \
           --verbose
+
 
     - name: Migration complete
       run: echo "Migration finished. Please validate manually."
