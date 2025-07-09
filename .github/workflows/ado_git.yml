@@ -11,7 +11,7 @@ jobs:
       GH_PAT: ${{ secrets.GH_PAT }}
       ADO_PAT: ${{ secrets.AZURE_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
-      ADO_TEAM_PROJECT: "_git"
+      ADO_TEAM_PROJECT: "EDH-TDMIG"
       ADO_REPO: "mgm-commons"
       GITHUB_ORG: "test-git-actions"
       GITHUB_REPO: "mgm-commons"
