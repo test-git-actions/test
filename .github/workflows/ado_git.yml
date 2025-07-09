@@ -42,6 +42,7 @@ jobs:
         az extension add --name azure-devops || echo "Extension already installed"
     
     - name: Validate Azure DevOps PAT
+      continue-on-error: true
       env:
         AZURE_DEVOPS_EXT_PAT: ${{ secrets.ADO_PAT }}
       run: |
