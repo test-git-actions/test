@@ -36,7 +36,7 @@ jobs:
     - name: List all Azure DevOps Projects, Teams, and Repos
       env:
         ADO_ORG: MGMResortsDigitalEngineering
-        ADO_PAT: ${{ secrets.ADO_PAT }}
+        ADO_PAT: ${{ env.ADO_PAT }}
       run: |
         echo "Fetching all projects, teams, and repositories in Azure DevOps org: ${ADO_ORG}"
     
