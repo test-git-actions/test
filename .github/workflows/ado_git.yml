@@ -34,6 +34,7 @@ jobs:
         gh ado2gh --help
 
     - name: List all Azure DevOps Projects, Teams, and Repos
+      continue-on-error: true
       env:
         ADO_ORG: MGMResortsDigitalEngineering
         ADO_PAT: ${{ env.ADO_PAT }}
@@ -45,7 +46,9 @@ jobs:
     
         # Fetch all projects
         echo "Fetching projects..."
-        PROJECTS=$(curl -s $AUTH_HEADER "$BASE_URL/_apis/projects?api-version=7.1-preview.1" | jq -r '.value[].name')
+        PROJECTS=$(curl -s $AUTH_HEADER "$BASE_URL/_apis/projects?api-version=7.1-preview.1")
+
+        echo $PROJECTS;
     
         for PROJECT in $PROJECTS; do
           echo ""
@@ -61,8 +64,6 @@ jobs:
           curl -s $AUTH_HEADER "$BASE_URL/$PROJECT/_apis/git/repositories?api-version=7.1-preview.1" \
             | jq -r '.value[] | "    • \(.name) - \(.webUrl)"'
         done
-
-
 
     - name: Migrate repository from ADO to GitHub
       run: |
@@ -84,7 +85,6 @@ jobs:
           --github-org "${GITHUB_ORG}" \
           --github-repo "${GITHUB_REPO}" \
           --verbose
-
 
     - name: Migration complete
       run: echo "Migration finished. Please validate manually."
