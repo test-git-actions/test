@@ -9,6 +9,7 @@ jobs:
 
     env:
       GH_PAT: ${{ secrets.GH_PAT }}
+      GH_TOKEN: ${{ secrets.GH_PAT }}
       ADO_PAT: ${{ secrets.AZURE_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
       ADO_TEAM_PROJECT: "Digital Ventures"
