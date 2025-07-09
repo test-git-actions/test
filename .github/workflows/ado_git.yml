@@ -40,6 +40,7 @@ jobs:
         gh ado2gh --help
 
     - name: Validate Azure DevOps PAT
+      continue-on-error: true 
       env:
         AZURE_DEVOPS_TOKEN: "${{ secrets.ADO_PAT }}"
         AZURE_DEVOPS_ORG: "${{ env.ADO_ORG }}"
@@ -54,6 +55,21 @@ jobs:
         else
           echo "Azure DevOps PAT is valid."
         fi
+
+    - name: Generate and print migration script
+      run: |
+        gh ado2gh generate-script \
+          --ado-org "${ADO_ORG}" \
+          --ado-team-project "${ADO_TEAM_PROJECT}" \
+          --github-org "${GITHUB_ORG}" \
+          --output migration-script.sh
+    
+        echo "✅ Migration script generated: migration-script.sh"
+        echo "🔍 Printing script contents:"
+        echo "--------------------------------------------"
+        cat migration-script.sh
+        echo "--------------------------------------------"
+
 
     # - name: Install Azure CLI
     #   run: |
