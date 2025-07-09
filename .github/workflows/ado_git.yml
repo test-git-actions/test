@@ -12,9 +12,9 @@ jobs:
       ADO_PAT: ${{ secrets.AZURE_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
       ADO_TEAM_PROJECT: "EDH-TDMIG"
-      ADO_REPO: "mgm-commons"
+      ADO_REPO: "EDHUW-CALLCENTER-DABS"
       GITHUB_ORG: "test-git-actions"
-      GITHUB_REPO: "mgm-commons"
+      GITHUB_REPO: "EDHUW-CALLCENTER-DABS"
 
     steps:
     - name: Checkout repository (optional)
