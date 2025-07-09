@@ -11,7 +11,7 @@ jobs:
       GH_PAT: ${{ secrets.GH_PAT }}
       ADO_PAT: ${{ secrets.AZURE_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
-      ADO_TEAM_PROJECT: "Digital Ventures"
+      ADO_TEAM_PROJECT: "_git"
       ADO_REPO: "mgm-commons"
       GITHUB_ORG: "test-git-actions"
       GITHUB_REPO: "mgm-commons"
@@ -32,6 +32,16 @@ jobs:
       run: |
         gh extension install github/gh-ado2gh
         gh ado2gh --help
+
+    - name: Print list of Azure DevOps repos in project
+      continue-on-error: true
+      run: |
+        echo "Fetching repo list from Azure DevOps..."
+    
+        curl -s -u ":${ADO_PAT}" \
+          "https://dev.azure.com/${ADO_ORG}/${ADO_TEAM_PROJECT}/_apis/git/repositories?api-version=7.1-preview.1" \
+          | jq -r '.value[] | "\(.name) - \(.webUrl)"'
+
 
     - name: Migrate repository from ADO to GitHub
       run: |
