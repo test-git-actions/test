@@ -33,14 +33,35 @@ jobs:
         gh extension install github/gh-ado2gh
         gh ado2gh --help
 
-    - name: Print list of Azure DevOps repos in project
-      continue-on-error: true
+    - name: List all Azure DevOps Projects, Teams, and Repos
+      env:
+        ADO_ORG: MGMResortsDigitalEngineering
+        ADO_PAT: ${{ secrets.ADO_PAT }}
       run: |
-        echo "Fetching repo list from Azure DevOps..."
+        echo "Fetching all projects, teams, and repositories in Azure DevOps org: ${ADO_ORG}"
     
-        curl -s -u ":${ADO_PAT}" \
-          "https://dev.azure.com/${ADO_ORG}/${ADO_TEAM_PROJECT}/_apis/git/repositories?api-version=7.1-preview.1" \
-          | jq -r '.value[] | "\(.name) - \(.webUrl)"'
+        BASE_URL="https://dev.azure.com/${ADO_ORG}"
+        AUTH_HEADER="-u :${ADO_PAT}"
+    
+        # Fetch all projects
+        echo "Fetching projects..."
+        PROJECTS=$(curl -s $AUTH_HEADER "$BASE_URL/_apis/projects?api-version=7.1-preview.1" | jq -r '.value[].name')
+    
+        for PROJECT in $PROJECTS; do
+          echo ""
+          echo "🔷 Project: $PROJECT"
+    
+          # Fetch teams for the project
+          echo "  📁 Teams:"
+          curl -s $AUTH_HEADER "$BASE_URL/$PROJECT/_apis/teams?api-version=7.1-preview.1" \
+            | jq -r '.value[] | "    • \(.name)"'
+    
+          # Fetch repos for the project
+          echo "  📂 Repositories:"
+          curl -s $AUTH_HEADER "$BASE_URL/$PROJECT/_apis/git/repositories?api-version=7.1-preview.1" \
+            | jq -r '.value[] | "    • \(.name) - \(.webUrl)"'
+        done
+
 
 
     - name: Migrate repository from ADO to GitHub
