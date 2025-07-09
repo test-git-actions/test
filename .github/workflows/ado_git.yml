@@ -39,6 +39,22 @@ jobs:
         gh extension install github/gh-ado2gh
         gh ado2gh --help
 
+    - name: Validate Azure DevOps PAT
+      env:
+        AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_PAT }}"
+        AZURE_DEVOPS_ORG: "${{ env.ADO_ORG }}"
+      run: |
+        echo "Validating Azure DevOps PAT..."
+        response=$(curl -s -o /dev/null -w "%{http_code}" -u ":${AZURE_DEVOPS_TOKEN}" \
+          "https://dev.azure.com/${AZURE_DEVOPS_ORG}/_apis/projects?api-version=7.1-preview.1")
+        
+        if [[ "$response" -ne 200 ]]; then
+          echo "Error: Azure DevOps PAT is invalid or does not have the required permissions. Response code: $response"
+          exit 1
+        else
+          echo "Azure DevOps PAT is valid."
+        fi
+
     # - name: Install Azure CLI
     #   run: |
     #     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
