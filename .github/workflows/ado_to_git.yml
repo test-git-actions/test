@@ -1,0 +1,59 @@
+name: Azure DevOps to GitHub Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      ado_org:
+        description: 'Azure DevOps organization name'
+        required: true
+      ado_team_project:
+        description: 'Azure DevOps project name'
+        required: true
+      ado_repo:
+        description: 'Azure DevOps repository name'
+        required: true
+      github_org:
+        description: 'GitHub organization name'
+        required: true
+      github_repo:
+        description: 'GitHub repository name'
+        required: true
+
+jobs:
+  migrate-repo:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
+      ADO_PAT: ${{ secrets.ADO_PAT }}
+
+    steps:
+    - name: Checkout repository (optional)
+      uses: actions/checkout@v4
+
+    - name: Install GitHub CLI
+      run: |
+        sudo apt update
+        sudo apt install -y gh
+        gh --version
+
+    - name: Install ADO2GH CLI Extension
+      run: |
+        gh extension install github/gh-ado2gh
+        gh ado2gh --help
+
+    - name: Migrate repository from ADO to GitHub
+      run: |
+        echo "Starting migration from Azure DevOps to GitHub..."
+
+        gh auth login --with-token <<< "$AZURE_PAT"
+
+        gh ado2gh migrate-repo \
+          --ado-org "${{ github.event.inputs.ado_org }}" \
+          --ado-team-project "${{ github.event.inputs.ado_team_project }}" \
+          --ado-repo "${{ github.event.inputs.ado_repo }}" \
+          --github-org "${{ github.event.inputs.github_org }}" \
+          --github-repo "${{ github.event.inputs.github_repo }}"
+
+    - name: Migration complete
+      run: echo "Migration finished. Please validate manually."
