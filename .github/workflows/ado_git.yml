@@ -65,6 +65,26 @@ jobs:
             | jq -r '.value[] | "    • \(.name) - \(.webUrl)"'
         done
 
+    - name: Install Azure CLI
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    
+    - name: Install Azure DevOps extension for Azure CLI
+      run: |
+        az extension add --name azure-devops || echo "Extension already installed"
+    
+    - name: Validate Azure DevOps PAT
+      env:
+        AZURE_DEVOPS_EXT_PAT: ${{ secrets.ADO_PAT }}
+      run: |
+        az devops configure --defaults organization=https://dev.azure.com/${{ env.ADO_ORG }}
+        if az devops project list --output none; then
+          echo "Azure DevOps PAT is valid."
+        else
+          echo "Invalid Azure DevOps PAT or insufficient permissions."
+          exit 1
+        fi
+
     - name: Migrate repository from ADO to GitHub
       run: |
         echo "Starting migration from Azure DevOps to GitHub..."
