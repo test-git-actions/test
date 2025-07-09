@@ -15,7 +15,7 @@ jobs:
 
     env:
       GH_PAT: ${{ secrets.GH_PAT }}
-      ADO_PAT: ${{ secrets.AZURE_PAT }}
+      ADO_PAT: ${{ secrets.ADO_PAT }}
       ADO_ORG: "MGMResortsDigitalEngineering"
       ADO_TEAM_PROJECT: "EDH-TDMIG"
       ADO_REPO: "EDHUW-CALLCENTER-DABS"
@@ -41,7 +41,7 @@ jobs:
 
     - name: Validate Azure DevOps PAT
       env:
-        AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_PAT }}"
+        AZURE_DEVOPS_TOKEN: "${{ secrets.ADO_PAT }}"
         AZURE_DEVOPS_ORG: "${{ env.ADO_ORG }}"
       run: |
         echo "Validating Azure DevOps PAT..."
