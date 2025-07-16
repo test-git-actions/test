@@ -37,6 +37,7 @@ jobs:
           echo "JF_PROJECT_KEY : $CLEANED_ORG"
 
       - name: Verify and Index Build in Xray
+        id: xray-index-check
         env:
             JF_URL: https://mgmresorts.jfrog.io
             JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
@@ -51,50 +52,77 @@ jobs:
         
             echo "🔍 Checking if build '${BUILD_NAME}' is already indexed in Xray..."
         
-            # Step 1: Call indexing status API and capture both response and HTTP status
             HTTP_RESPONSE=$(mktemp)
             HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$HTTP_RESPONSE" \
-                -H "Content-Type: application/json" \
-                -H "$AUTH_HEADER" \
-                "$JF_URL/xray/api/v1/binMgr/$BIN_MGR_ID/builds?projectKey=$JF_PROJECT_KEY")
-        
-            if [[ "$HTTP_STATUS" -ne 200 ]]; then
-                echo "❌ Failed to get indexing status (HTTP $HTTP_STATUS)"
-                echo "Response:"
-                cat "$HTTP_RESPONSE"
-                exit 1
-            fi
+            -H "Content-Type: application/json" \
+            -H "$AUTH_HEADER" \
+            "$JF_URL/xray/api/v1/binMgr/$BIN_MGR_ID/builds?projectKey=$JF_PROJECT_KEY")
         
             RESPONSE=$(cat "$HTTP_RESPONSE")
             rm -f "$HTTP_RESPONSE"
         
-            # Step 2: Check if build is in indexed or non-indexed list
+            echo "http_status=$HTTP_STATUS" >> "$GITHUB_OUTPUT"
+            echo "api_response=$(echo "$RESPONSE" | jq -c .)" >> "$GITHUB_OUTPUT"
+        
             IS_INDEXED=$(echo "$RESPONSE" | jq -r --arg name "$BUILD_NAME" '.indexed_builds[]? | select(. == $name)')
             IS_NOT_INDEXED=$(echo "$RESPONSE" | jq -r --arg name "$BUILD_NAME" '.non_indexed_builds[]? | select(. == $name)')
         
             if [[ -n "$IS_INDEXED" ]]; then
-                echo "✅ Build '$BUILD_NAME' is already indexed."
-                exit 0
+            echo "✅ Build '$BUILD_NAME' is already indexed."
+            exit 0
             elif [[ -n "$IS_NOT_INDEXED" ]]; then
-                echo "⚙️ Build '$BUILD_NAME' is not indexed. Triggering indexing..."
+            echo "⚙️ Build '$BUILD_NAME' is not indexed. Triggering indexing..."
         
-                INDEX_RES=$(curl -s -w "%{http_code}" -o /tmp/response.txt \
+            INDEX_RES=$(curl -s -w "%{http_code}" -o /tmp/response.txt \
                 -X POST \
                 -H "Content-Type: application/json" \
                 -H "$AUTH_HEADER" \
                 -d "{\"names\": [\"$BUILD_NAME\"]}" \
                 "$JF_URL/xray/api/v1/binMgr/builds?projectKey=$JF_PROJECT_KEY")
         
-                if [[ "$INDEX_RES" -ne 200 ]]; then
+            echo "index_trigger_status=$INDEX_RES" >> "$GITHUB_OUTPUT"
+            echo "index_trigger_response=$(cat /tmp/response.txt | jq -c .)" >> "$GITHUB_OUTPUT"
+        
+            if [[ "$INDEX_RES" -ne 200 ]]; then
                 echo "❌ Failed to trigger indexing (HTTP $INDEX_RES)"
                 cat /tmp/response.txt
                 exit 1
-                fi
+            fi
         
-                echo "✅ Indexing triggered successfully for '$BUILD_NAME'."
+            echo "✅ Indexing triggered successfully for '$BUILD_NAME'."
             else
-                echo "❌ Build '$BUILD_NAME' not found in either indexed or non-indexed list. Check if it's published to Artifactory."
-                exit 1
+            echo "❌ Build '$BUILD_NAME' not found in either indexed or non-indexed list. Check if it's published to Artifactory."
+            exit 1
             fi
         
         
+      - name: Add migration comment
+        uses: actions/github-script@v6
+        with:
+            script: |
+                const httpStatus = `${{ steps.xray-index-check.outputs.http_status }}`
+                const apiResponse = `${{ steps.xray-index-check.outputs.api_response }}`
+                const indexStatus = `${{ steps.xray-index-check.outputs.index_trigger_status || 'N/A' }}`
+                const indexResponse = `${{ steps.xray-index-check.outputs.index_trigger_response || 'N/A' }}`
+
+                const body = `
+                    :hourglass: **${{ steps.migration-type.outputs.result }} migration in progress.**
+
+                    **Xray API Status:** \`${httpStatus}\`
+                    **API Response:** \`\`\`json
+                    ${apiResponse}
+                    \`\`\`
+                    **Index Trigger Status:** \`${indexStatus}\`
+                    **Index Trigger Response:** \`\`\`json
+                    ${indexResponse}
+                    \`\`\`
+
+                    [➡️ View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})
+                `
+
+                github.rest.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body
+                })
