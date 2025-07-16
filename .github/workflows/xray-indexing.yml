@@ -31,7 +31,13 @@ jobs:
       - name: Install JFrog CLI
         run: |
           curl -fL https://install-cli.jfrog.io | sh
-          sudo mv jfrog /usr/local/bin/jf
+          if [ -f "./jfrog" ]; then
+            sudo mv jfrog /usr/local/bin/jf
+          elif [ -f "./jf" ]; then
+            sudo mv jf /usr/local/bin/jf
+          else
+            echo "JFrog CLI not found after download" && exit 1
+          fi
           jf --version
 
       - name: JFrog CLI - Index Build in Xray
