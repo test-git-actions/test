@@ -106,7 +106,7 @@ jobs:
             const resultMessage = `${{ steps.xray-index-check.outputs.result_message }}`
       
             const body = `
-              ### 📦 Xray Build Indexing Summary)
+              ### 📦 Xray Build Indexing Summary
               
               **Status:** ${resultMessage}
               
