@@ -1,6 +1,7 @@
 name: Trigger JFrog Xray Indexing
 
 on:
+  workflow_call:
   issues:
     types: [opened]
 
