@@ -7,6 +7,7 @@ on:
 
 env:
   JF_URL: "https://mgmresorts.jfrog.io"
+  USERNAME: "pkumar@mgmresorts.com"
   JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
 jobs:
@@ -22,23 +23,74 @@ jobs:
       - name: Echo parsed JSON
         run: echo "${{ steps.parse-issue-body.outputs.jsonString }}"
 
-      - name: Debug parsed values
+      - name: Debug parsed values and set env
         run: |
-          echo "Parsed Build Name: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}"
-          echo "Parsed Organization: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}"
-          echo "Parsed Indexing Repo: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).indexing_repo }}"
+          BUILD_NAME=${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}
+          ORG=${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}
+          echo "Parsed Organization: $ORG"
+          echo "Parsed Build Name: $BUILD_NAME"
 
-      - name: Install JFrog CLI
-        run: |
-          curl -fL https://install-cli.jfrog.io | sh
-          jf --version
+          CLEANED_ORG="${ORG#mgmri-}"
+          echo "JF_PROJECT_KEY=$CLEANED_ORG" >> "$GITHUB_ENV"
+          echo "JF_PROJECT_KEY : $CLEANED_ORG"
 
-      - name: JFrog CLI - Index Build in Xray
-        env:
-          JF_URL: ${{ env.JF_URL }}
-          JF_ACCESS_TOKEN: ${{ env.JF_ACCESS_TOKEN }}
-          BUILD_NAME: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}
-          JF_PROJECT: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}
-        run: |
-          jf c add temp-server --url=$JF_URL --access-token=$JF_ACCESS_TOKEN --interactive=false
-          jf xr index-build "$BUILD_NAME" --project="$JF_PROJECT"
+          - name: Verify and Index Build in Xray
+          env:
+            JF_URL: ${{ env.JF_URL }}
+            JF_ACCESS_TOKEN: ${{ env.JF_ACCESS_TOKEN }}
+            BUILD_NAME: ${{ env.BUILD_NAME }}
+            JF_PROJECT_KEY: ${{ env.JF_PROJECT_KEY }}
+          run: |
+            set -euo pipefail
+        
+            BIN_MGR_ID="default"
+            AUTH_HEADER="Authorization: Bearer $JF_ACCESS_TOKEN"
+        
+            echo "🔍 Checking if build '${BUILD_NAME}' is already indexed in Xray..."
+        
+            # Step 1: Call indexing status API and capture both response and HTTP status
+            HTTP_RESPONSE=$(mktemp)
+            HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$HTTP_RESPONSE" \
+              -H "Content-Type: application/json" \
+              -H "$AUTH_HEADER" \
+              "$JF_URL/xray/api/v1/binMgr/$BIN_MGR_ID/builds?projectKey=$JF_PROJECT_KEY")
+        
+            if [[ "$HTTP_STATUS" -ne 200 ]]; then
+              echo "❌ Failed to get indexing status (HTTP $HTTP_STATUS)"
+              echo "Response:"
+              cat "$HTTP_RESPONSE"
+              exit 1
+            fi
+        
+            RESPONSE=$(cat "$HTTP_RESPONSE")
+            rm -f "$HTTP_RESPONSE"
+        
+            # Step 2: Check if build is in indexed or non-indexed list
+            IS_INDEXED=$(echo "$RESPONSE" | jq -r --arg name "$BUILD_NAME" '.indexed_builds[]? | select(. == $name)')
+            IS_NOT_INDEXED=$(echo "$RESPONSE" | jq -r --arg name "$BUILD_NAME" '.non_indexed_builds[]? | select(. == $name)')
+        
+            if [[ -n "$IS_INDEXED" ]]; then
+              echo "✅ Build '$BUILD_NAME' is already indexed."
+              exit 0
+            elif [[ -n "$IS_NOT_INDEXED" ]]; then
+              echo "⚙️ Build '$BUILD_NAME' is not indexed. Triggering indexing..."
+        
+              INDEX_RES=$(curl -s -w "%{http_code}" -o /tmp/response.txt \
+                -X POST \
+                -H "Content-Type: application/json" \
+                -H "$AUTH_HEADER" \
+                -d "{\"names\": [\"$BUILD_NAME\"]}" \
+                "$JF_URL/xray/api/v1/binMgr/builds?projectKey=$JF_PROJECT_KEY")
+        
+              if [[ "$INDEX_RES" -ne 200 ]]; then
+                echo "❌ Failed to trigger indexing (HTTP $INDEX_RES)"
+                cat /tmp/response.txt
+                exit 1
+              fi
+        
+              echo "✅ Indexing triggered successfully for '$BUILD_NAME'."
+            else
+              echo "❌ Build '$BUILD_NAME' not found in either indexed or non-indexed list. Check if it's published to Artifactory."
+              exit 1
+            fi
+        
