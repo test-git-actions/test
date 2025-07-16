@@ -1,0 +1,38 @@
+name: Trigger JFrog Xray Indexing
+
+on:
+  issues:
+    types: [opened]
+
+env:
+  JF_URL: "https://mgmresorts.jfrog.io"
+  JF_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  trigger-xray-indexing:
+    if: contains(github.event.issue.title, '[Xray Indexing]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Parse issue body
+        id: parse-issue-body
+        uses: stefanbuck/github-issue-parser@v3
+
+      - name: Echo parsed JSON
+        run: echo "${{ steps.parse-issue-body.outputs.jsonString }}"
+
+      - name: Debug parsed values
+        run: |
+          echo "Parsed Build Name: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}"
+          echo "Parsed Organization: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).organization }}"
+          echo "Parsed Indexing Repo: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).indexing_repo }}"
+
+      - name: JFrog CLI - Index Build in Xray
+        env:
+          JF_URL: ${{ env.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ env.JF_ACCESS_TOKEN }}
+          BUILD_NAME: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}
+          JF_PROJECT: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).organization }}
+        run: |
+          jf c add temp-server --url=$JF_URL --access-token=$JF_ACCESS_TOKEN --interactive=false
+          jf xr index-build "$BUILD_NAME" --project="$JF_PROJECT"
