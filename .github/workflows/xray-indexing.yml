@@ -32,6 +32,8 @@ jobs:
 
           CLEANED_ORG="${ORG#mgmri-}"
           echo "JF_PROJECT_KEY=$CLEANED_ORG" >> "$GITHUB_ENV"
+          echo "BUILD_NAME=$BUILD_NAME" >> "$GITHUB_ENV"
+
           echo "JF_PROJECT_KEY : $CLEANED_ORG"
 
       - name: Verify and Index Build in Xray
