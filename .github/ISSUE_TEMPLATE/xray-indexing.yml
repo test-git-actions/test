@@ -2,8 +2,6 @@ name: JFrog Xray Indexing Request
 description: Request to create JF Xray indexing using a build name
 title: "[Xray Indexing] Request for {{ build_name }}"
 labels: ["xray", "indexing", "jfrog"]
-assignees:
-  - your-gh-username
 
 body:
   - type: input
@@ -15,23 +13,34 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: jfrog_project
+  - type: dropdown
+    id: organization
     attributes:
-      label: JFrog Project Key
-      description: "Enter the JFrog project key (e.g., `my-jfrog-project`)"
-      placeholder: "e.g., commerce"
+      label: Select Organization
+      description: Please select the Organization
+      options:
+        - mgmri-commerce
+        - mgmri-dge
+        - mgmri-source
+        - mgmri-ciam
+        - Core
+        - mgmri-corp
+        - mgmri-data
+        - mgmri-eiam
+        - mgmri-entertainment
+        - mgmri-gaming
+        - mgmri-hotel
+        - mgmri-secops
+        - mgmri-shared
     validations:
       required: true
 
   - type: input
     id: indexing_repo
     attributes:
-      label: Target Repository (Optional)
-      description: "Specify if indexing should be limited to a specific repo (optional)"
-      placeholder: "e.g., my-npm-virtual"
+      label: "Target Repository"
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: notes
