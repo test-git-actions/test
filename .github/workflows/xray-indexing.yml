@@ -27,6 +27,12 @@ jobs:
           echo "Parsed Organization: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).organization }}"
           echo "Parsed Indexing Repo: ${{ fromJson(steps.parse-issue-body.outputs.jsonString).indexing_repo }}"
 
+      - name: Install JFrog CLI
+        run: |
+          curl -fL https://install-cli.jfrog.io | sh
+          sudo mv jfrog /usr/local/bin/jf
+          jf --version
+
       - name: JFrog CLI - Index Build in Xray
         env:
           JF_URL: ${{ env.JF_URL }}
