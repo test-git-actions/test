@@ -23,8 +23,8 @@ jobs:
 
       - name: Debug parsed values and set env
         run: |
-          BUILD_NAME=${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}
-          ORG=${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}
+          BUILD_NAME="${{ fromJson(steps.parse-issue-body.outputs.jsonString).build_name }}"
+          ORG="${{ fromJson(steps.parse-issue-body.outputs.jsonString).target_organization }}"
           echo "Parsed Organization: $ORG"
           echo "Parsed Build Name: $BUILD_NAME"
 
