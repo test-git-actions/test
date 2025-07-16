@@ -104,10 +104,9 @@ jobs:
             const indexStatus = `${{ steps.xray-index-check.outputs.index_trigger_status }}`
             const indexResponse = `${{ steps.xray-index-check.outputs.index_trigger_response }}`
             const resultMessage = `${{ steps.xray-index-check.outputs.result_message }}`
-            const migrationType = `${{ steps.migration-type.outputs.result }}`
       
             const body = `
-              ### 📦 Xray Build Indexing Summary (${migrationType} Migration)
+              ### 📦 Xray Build Indexing Summary)
               
               **Status:** ${resultMessage}
               
