@@ -16,8 +16,8 @@ body:
   - type: dropdown
     id: organization
     attributes:
-      label: Select Organization
-      description: Please select the Organization
+      label: Target Organization
+      description: Please select the Target Organization
       options:
         - mgmri-commerce
         - mgmri-dge
@@ -32,13 +32,6 @@ body:
         - mgmri-hotel
         - mgmri-secops
         - mgmri-shared
-    validations:
-      required: true
-
-  - type: input
-    id: indexing_repo
-    attributes:
-      label: "Target Repository"
     validations:
       required: true
 
