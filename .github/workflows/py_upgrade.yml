@@ -1,7 +1,7 @@
 name: JFrog Audit Dotnet
 on:
   push:
-    branches: ['nuget_version_upgrade_automate']
+    branches: ['py_version_upgrade']
 
     paths-ignore:
       # When the below folders are checked-in, the GitHub Actions job will not start.
