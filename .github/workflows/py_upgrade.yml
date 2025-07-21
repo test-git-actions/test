@@ -86,43 +86,49 @@ jobs:
       - name: Apply auto-fixes to requirements.txt
         run: |
             set -e
+        
             INPUT_FILE="audit-report.json"
             REQ_FILE="requirements.txt"
-  
+        
             if [[ ! -f "$REQ_FILE" ]]; then
               echo "❌ requirements.txt not found!"
               exit 1
             fi
-  
+        
             jq -c '.[0].violations[]
               | select(.severity == "High" or .severity == "Critical")
-              | .components 
+              | .components
               | to_entries[]
+              | select(.key | test("^pypi://[^:]+:[^:]+$"))
               | {
-                  package: (.key | split(":")[0]),
+                  package: (.key | sub("^pypi://"; "") | split(":")[0]),
                   version: (.key | split(":")[1]),
                   fixed_versions: .value.fixed_versions
                 }' "$INPUT_FILE" | while read -r pkg; do
-  
+        
               PACKAGE=$(echo "$pkg" | jq -r '.package')
               FIXED=$(echo "$pkg" | jq -r '.fixed_versions[]?' | sort -V | tail -n1)
-  
-              if [[ -z "$FIXED" || "$FIXED" == "null" ]]; then
-                echo "⚠️ Skipping $PACKAGE — no fixed version"
+        
+              if [[ -z "$PACKAGE" || -z "$FIXED" || "$FIXED" == "null" ]]; then
+                echo "⚠️ Skipping invalid or unresolved entry: $PACKAGE -> $FIXED"
                 continue
               fi
-  
+        
               echo "📦 Fixing $PACKAGE to $FIXED"
-  
-              if grep -q "^$PACKAGE==" "$REQ_FILE"; then
-                sed -i "s/^$PACKAGE==.*/$PACKAGE==$FIXED/" "$REQ_FILE"
-              elif grep -q "^$PACKAGE[><=]" "$REQ_FILE"; then
-                sed -i "s/^$PACKAGE.*/$PACKAGE==$FIXED/" "$REQ_FILE"
+        
+              # Escape for sed compatibility
+              ESCAPED_PACKAGE=$(printf '%s\n' "$PACKAGE" | sed 's/[]\/$*.^[]/\\&/g')
+        
+              if grep -q "^$ESCAPED_PACKAGE==" "$REQ_FILE"; then
+                sed -i "s/^$ESCAPED_PACKAGE==.*/$PACKAGE==$FIXED/" "$REQ_FILE"
+              elif grep -q "^$ESCAPED_PACKAGE[><=]" "$REQ_FILE"; then
+                sed -i "s/^$ESCAPED_PACKAGE.*/$PACKAGE==$FIXED/" "$REQ_FILE"
               else
                 echo "$PACKAGE==$FIXED" >> "$REQ_FILE"
                 echo "➕ Added $PACKAGE==$FIXED"
               fi
             done
+        
   
       - name: Upload fixed requirements.txt
         uses: actions/upload-artifact@v4
