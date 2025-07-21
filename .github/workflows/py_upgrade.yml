@@ -43,10 +43,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           lfs: true
     
-      - name: Dotnet setup
-        uses: actions/setup-dotnet@v4
-        with:
-            dotnet-version: ${{env.DOTNET_VERSION}}
+    #   - name: Dotnet setup
+    #     uses: actions/setup-dotnet@v4
+    #     with:
+    #         dotnet-version: ${{env.DOTNET_VERSION}}
          
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
@@ -102,8 +102,8 @@ jobs:
               | select(.key | test("^pypi://[^:]+:[^:]+$"))
               | {
                   package: (.key | sub("^pypi://"; "") | split(":")[0]),
-                  version: (.key | split(":")[1]),
-                  fixed_versions: .value.fixed_versions
+                  version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
+                  fixed_versions: (.value.fixed_versions | map(gsub("\\[|\\]"; "")))
                 }' "$INPUT_FILE" | while read -r pkg; do
         
               PACKAGE=$(echo "$pkg" | jq -r '.package')
@@ -114,9 +114,14 @@ jobs:
                 continue
               fi
         
+              # Additional sanity check: skip if brackets remain after cleanup
+              if [[ "$PACKAGE" == *"["* || "$PACKAGE" == *"]"* || "$FIXED" == *"["* || "$FIXED" == *"]"* ]]; then
+                echo "⚠️ Skipping $PACKAGE due to remaining square brackets in name or version: $FIXED"
+                continue
+              fi
+        
               echo "📦 Fixing $PACKAGE to $FIXED"
         
-              # Escape for sed compatibility
               ESCAPED_PACKAGE=$(printf '%s\n' "$PACKAGE" | sed 's/[]\/$*.^[]/\\&/g')
         
               if grep -q "^$ESCAPED_PACKAGE==" "$REQ_FILE"; then
@@ -128,6 +133,7 @@ jobs:
                 echo "➕ Added $PACKAGE==$FIXED"
               fi
             done
+        
         
   
       - name: Upload fixed requirements.txt
