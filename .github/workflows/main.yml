@@ -1,1 +1,156 @@
 
+name: JFrog Audit Dotnet
+on:
+  push:
+    branches: ['nuget_version_upgrade_automate']
+
+    paths-ignore:
+      # When the below folders are checked-in, the GitHub Actions job will not start.
+      #  - '.github/**'
+      - '.jfrog/**'
+
+env:
+  JF_RT_URL: https://mgmresorts.jfrog.io
+  RT_REPO_VIRTUAL: 'dge-consume-packages-nuget-dev-virtual'
+  JFROG_CLI_LOG_LEVEL: 'Error' # DEBUG, INFO, WARN, ERROR
+  OIDC_PROVIDER_NAME: 'test-exploration-oidc'
+  JF_PROJECT: 'dge'
+  DOTNET_VERSION: '9.0'                     
+
+permissions:
+  actions: read # for detecting the Github Actions environment.
+  id-token: write # for creating OIDC tokens for signing.
+  packages: write # for uploading attestations.
+  contents: write # to push updates while version bump and publish to repo, read is fine if there is just read operation​
+  security-events: write # Required for uploading code scanning.
+  issues: read
+
+jobs:
+  audit-auto-fix:
+    concurrency: ci-${{ github.ref }}
+
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Print ENV Vars
+        run: |-
+          echo "JF_RT_URL= ${{env.JF_RT_URL}}"
+          echo "RT_REPO_VIRTUAL= ${{env.RT_REPO_VIRTUAL}}"
+          echo "JFROG_CLI_LOG_LEVEL= ${{env.JFROG_CLI_LOG_LEVEL}}"
+          echo "OIDC_PROVIDER_NAME= ${{env.OIDC_PROVIDER_NAME}}"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          lfs: true
+    
+      - name: Dotnet setup
+        uses: actions/setup-dotnet@v4
+        with:
+            dotnet-version: ${{env.DOTNET_VERSION}}
+         
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        with:
+          version: 2.74.1
+          oidc-provider-name: ${{ env.OIDC_PROVIDER_NAME }}
+          disable-job-summary: false
+        env:
+          JF_URL: ${{ env.JF_RT_URL }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    #   - name: Add Nuget Sources & Set OIDC Token as env variable JFROG_TOKEN
+    #     if: true
+    #     run: |
+    #       echo JFROG_TOKEN=${{ steps.setup-cli.outputs.oidc-token }} >> $GITHUB_ENV
+    #       dotnet nuget add source https://mgmresorts.jfrog.io/artifactory/api/nuget/v3/${{env.RT_REPO_VIRTUAL}}/index.json -n Artifactory -u arana@mgmresorts.com -p ${{ secrets.JF_TOKEN }} --store-password-in-clear-text
+            
+
+    #   - name: Configure the project's repositories
+    #     run: |
+    #         jf dotnet-config --repo-resolve='${{ env.RT_REPO_VIRTUAL}}'
+          
+      - name: Xray Audit
+        continue-on-error: true
+        run: |
+          cd $GITHUB_WORKSPACE
+          echo "Running JFrog audit... $GITHUB_WORKSPACE"
+          jf audit --format json > audit-report.json
+
+      - name: Jf audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jf audit report
+          path: audit-report.json
+   
+      - name: Apply auto-fixes to requirements.txt
+        run: |
+            set -e
+            INPUT_FILE="audit-report.json"
+            REQ_FILE="requirements.txt"
+  
+            if [[ ! -f "$REQ_FILE" ]]; then
+              echo "❌ requirements.txt not found!"
+              exit 1
+            fi
+  
+            jq -c '.[0].violations[]
+              | select(.severity == "High" or .severity == "Critical")
+              | .components 
+              | to_entries[]
+              | {
+                  package: (.key | split(":")[0]),
+                  version: (.key | split(":")[1]),
+                  fixed_versions: .value.fixed_versions
+                }' "$INPUT_FILE" | while read -r pkg; do
+  
+              PACKAGE=$(echo "$pkg" | jq -r '.package')
+              FIXED=$(echo "$pkg" | jq -r '.fixed_versions[]?' | sort -V | tail -n1)
+  
+              if [[ -z "$FIXED" || "$FIXED" == "null" ]]; then
+                echo "⚠️ Skipping $PACKAGE — no fixed version"
+                continue
+              fi
+  
+              echo "📦 Fixing $PACKAGE to $FIXED"
+  
+              if grep -q "^$PACKAGE==" "$REQ_FILE"; then
+                sed -i "s/^$PACKAGE==.*/$PACKAGE==$FIXED/" "$REQ_FILE"
+              elif grep -q "^$PACKAGE[><=]" "$REQ_FILE"; then
+                sed -i "s/^$PACKAGE.*/$PACKAGE==$FIXED/" "$REQ_FILE"
+              else
+                echo "$PACKAGE==$FIXED" >> "$REQ_FILE"
+                echo "➕ Added $PACKAGE==$FIXED"
+              fi
+            done
+  
+      - name: Upload fixed requirements.txt
+        uses: actions/upload-artifact@v4
+        with:
+            name: fixed-requirements
+            path: requirements.txt
+  
+      - name: Create fix branch and commit
+        id: create_fix_branch
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            git config --global user.name "MGM CI Bot"
+            git config --global user.email "mgm-ci-bot@users.noreply.github.com"
+  
+            if git diff --quiet requirements.txt; then
+              echo "✅ No vulnerable packages were updated."
+              exit 0
+            fi
+  
+            TIMESTAMP=$(date +%s)
+            BRANCH="fix/vuln-deps-python-$TIMESTAMP"
+  
+            git checkout -b "$BRANCH"
+            git add requirements.txt
+            git commit -m "chore: auto-patched Python dependencies for vulnerabilities [automated]"
+            git push origin "$BRANCH"
+  
+            echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+            echo "🚀 Fix branch pushed: $BRANCH"
