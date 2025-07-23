@@ -95,16 +95,30 @@ jobs:
               exit 1
             fi
         
+            # jq -c '.[0].violations[]
+            #   | select(.severity == "High" or .severity == "Critical")
+            #   | .components
+            #   | to_entries[]
+            #   | select(.key | test("^pypi://[^:]+:[^:]+$"))
+            #   | {
+            #       package: (.key | sub("^pypi://"; "") | split(":")[0]),
+            #       version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
+            #       fixed_versions: (.value.fixed_versions | map(gsub("\\[|\\]"; "")))
+            #     }' "$INPUT_FILE" | while read -r pkg; do
+
+
+            # Read each vulnerable package and update if needed
             jq -c '.[0].violations[]
               | select(.severity == "High" or .severity == "Critical")
+              | select(.components != null)
               | .components
               | to_entries[]
               | select(.key | test("^pypi://[^:]+:[^:]+$"))
               | {
                   package: (.key | sub("^pypi://"; "") | split(":")[0]),
                   version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
-                  fixed_versions: (.value.fixed_versions | map(gsub("\\[|\\]"; "")))
-                }' "$INPUT_FILE" | while read -r pkg; do
+                  fixed_versions: (.value.fixed_versions // [] | map(gsub("\\[|\\]"; "")))
+                }' "$INPUT_FILE" | while read -r pkg_json; do
         
               PACKAGE=$(echo "$pkg" | jq -r '.package')
               FIXED=$(echo "$pkg" | jq -r '.fixed_versions[]?' | sort -V | tail -n1)
