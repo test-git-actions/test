@@ -34,12 +34,14 @@ jobs:
           echo "RT_REPO_VIRTUAL= ${{env.RT_REPO_VIRTUAL}}"
           echo "JFROG_CLI_LOG_LEVEL= ${{env.JFROG_CLI_LOG_LEVEL}}"
           echo "OIDC_PROVIDER_NAME= ${{env.OIDC_PROVIDER_NAME}}"
+          
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           lfs: true
+          ref: py_version_upgrade
          
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
