@@ -118,7 +118,7 @@ jobs:
                   package: (.key | sub("^pypi://"; "") | split(":")[0]),
                   version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
                   fixed_versions: (.value.fixed_versions // [] | map(gsub("\\[|\\]"; "")))
-                }' "$INPUT_FILE" | while read -r pkg_json; do
+                }' "$INPUT_FILE" | while read -r pkg; do
         
               PACKAGE=$(echo "$pkg" | jq -r '.package')
               FIXED=$(echo "$pkg" | jq -r '.fixed_versions[]?' | sort -V | tail -n1)
