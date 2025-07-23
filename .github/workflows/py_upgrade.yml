@@ -70,12 +70,19 @@ jobs:
     #     run: |
     #         jf dotnet-config --repo-resolve='${{ env.RT_REPO_VIRTUAL}}'
           
-      - name: Xray Audit
+      # - name: Xray Audit
+      #   continue-on-error: true
+      #   run: |
+      #     cd $GITHUB_WORKSPACE
+      #     echo "Running JFrog audit... $GITHUB_WORKSPACE"
+      #     jf audit --format json > audit-report.json
+
+      - name: JFrog Xray Scan
         continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
-          echo "Running JFrog audit... $GITHUB_WORKSPACE"
-          jf audit --format json > audit-report.json
+          echo "🔍 Scanning Python requirements.txt with JFrog Xray..."
+          jf scan --requirements=requirements.txt --format=json > audit-report.json
 
 
       - name: Jf audit report
@@ -95,18 +102,6 @@ jobs:
               echo "❌ requirements.txt not found!"
               exit 1
             fi
-        
-            # jq -c '.[0].violations[]
-            #   | select(.severity == "High" or .severity == "Critical")
-            #   | .components
-            #   | to_entries[]
-            #   | select(.key | test("^pypi://[^:]+:[^:]+$"))
-            #   | {
-            #       package: (.key | sub("^pypi://"; "") | split(":")[0]),
-            #       version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
-            #       fixed_versions: (.value.fixed_versions | map(gsub("\\[|\\]"; "")))
-            #     }' "$INPUT_FILE" | while read -r pkg; do
-
 
             # Read each vulnerable package and update if needed
             jq -c '.[0].violations[]
