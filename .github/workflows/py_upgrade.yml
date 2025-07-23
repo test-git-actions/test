@@ -74,10 +74,8 @@ jobs:
         continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
-          echo "Running JFrog audit on requirements.txt..."
-          
-          # Explicitly point to the requirements file instead of scanning the whole project dir
-          jf audit --requirements=requirements.txt --format=json > audit-report.json
+          echo "Running JFrog audit... $GITHUB_WORKSPACE"
+          jf audit --format json > audit-report.json
 
 
       - name: Jf audit report
