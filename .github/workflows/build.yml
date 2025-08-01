@@ -1,0 +1,52 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - 'SSDLC-mgm_analytics'
+      - 'main'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+env:
+  JF_URL: ${{ vars.JF_URL }}
+  RT_REPO_VIRTUAL: 'source-packages-npm-virtual'
+  BUILD_NAME: 'ms-errors'
+  BUILD_NUMBER: ${{ github.run_number }}
+  JF_PROJECT_NAME: ${{ vars.JF_PROJECT_NAME }}
+  OIDC_PROVIDER_NAME: ${{ vars.OIDC_PROVIDER_NAME }}
+  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+jobs:
+  build:
+    runs-on: mgm-docker-in-docker
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          oidc-provider-name: ${{ env.OIDC_PROVIDER_NAME }}
+          JF_GIT_TOKEN: ${{ secrets.GH_PAT }}
+          
+      - name: Configure JFrog CLI for npm
+        run: jf npm-config --repo-resolve=${RT_REPO_VIRTUAL} --repo-deploy=${RT_REPO_VIRTUAL} --global=false
+
+      - name: Installing Node packages
+        run: jf npm ci 
+
+      - name: Run Tests
+        run: jf npm run ci
+  
+      - name: Xray Audit
+        run: jf audit --npm=true --fail=true --min-severity=High --project=${{ env.JF_PROJECT_NAME }}
