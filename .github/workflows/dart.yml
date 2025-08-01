@@ -4,7 +4,7 @@ run-name: "(CI) - ${{ github.event.head_commit.message }}"
 on:
   push:
     branches:
-      - "SSDLC-mgm_analytics"
+      - "SSDLC-mgm_analytics123"
 
 jobs:
   ci:
