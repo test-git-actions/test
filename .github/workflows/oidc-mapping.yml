@@ -7,8 +7,8 @@ on:
 env:
   OIDC_PROVIDER: "mgmri-enterprise-oidc"
   JFROG_URL: "https://mgmresorts.jfrog.ioo"
-  JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  JFROG_API_KEY: "12345"
+  GH_TOKEN: "12345"
 
 jobs:
   automate-oidc-mapping:
