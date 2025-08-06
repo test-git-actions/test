@@ -3,6 +3,9 @@ name: 🔄 Update Identity Mapping in JFrog on Issue Creation
 on:
   workflow_call:
 
+permissions:
+  contents: read
+  issues: write
 
 env:
   OIDC_PROVIDER: "mgmri-enterprise-oidc"
