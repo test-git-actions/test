@@ -13,7 +13,6 @@ env:
   
 jobs:
   automate-oidc-mapping:
-    if: contains(github.event.issue.title, '[Automated Multi-Repo OIDC Mapping]')
     runs-on: ubuntu-latest
 
     steps:
