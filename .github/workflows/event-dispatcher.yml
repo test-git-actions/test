@@ -24,6 +24,5 @@ jobs:
   #   secrets: inherit
 
   dispatch-oidc-mapping:
-    if: contains(github.event.issue.labels.*.name, 'oidc-mapping')
     uses: ./.github/workflows/oidc-mapping.yml
     secrets: inherit
