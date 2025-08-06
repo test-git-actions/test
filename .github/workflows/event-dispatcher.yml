@@ -18,7 +18,12 @@ jobs:
   #   uses: ./.github/workflows/run-incremental-push.yml
   #   secrets: inherit
 
-  dispatch-xray-indexing:
-    if: contains(github.event.issue.labels.*.name, 'xray-indexing')
-    uses: ./.github/workflows/xray-indexing.yml
+  # dispatch-xray-indexing:
+  #   if: contains(github.event.issue.labels.*.name, 'xray-indexing')
+  #   uses: ./.github/workflows/xray-indexing.yml
+  #   secrets: inherit
+
+  dispatch-oidc-mapping:
+    if: contains(github.event.issue.labels.*.name, 'oidc-mapping')
+    uses: ./.github/workflows/oidc-mapping.yml
     secrets: inherit
