@@ -6,7 +6,7 @@ on:
 
 env:
   OIDC_PROVIDER: "mgmri-enterprise-oidc"
-  JFROG_URL: "https://mgmresorts.jfrog.io"
+  JFROG_URL: "https://mgmresorts.jfrog.ioo"
   JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
