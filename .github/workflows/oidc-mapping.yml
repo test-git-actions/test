@@ -75,7 +75,7 @@ jobs:
           const body = `
           ### 📝 Issue Title Updated
 
-          The issue title has been updated to reflect the identity mapping request for **${org}/${repo}**.
+          The issue title has been updated to reflect the identity mapping request for **${org}/[${repo}]**.
 
           🔗 [View this workflow run](${runUrl})
           `;
