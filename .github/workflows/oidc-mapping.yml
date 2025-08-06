@@ -41,7 +41,7 @@ jobs:
         JSON_STRING: ${{ steps.parse-issue-body.outputs.jsonString }}
       run: |
         echo $JSON_STRING
-        echo "REPO_NAMES=${{ steps.json.outputs.repository_names }}" >> $GITHUB_ENV
+        echo "REPO_NAMES=${{ steps.json.outputs._repository_names }}" >> $GITHUB_ENV
         echo "ORG_NAME=${{ fromJson(steps.parse-issue-body.outputs.jsonString)._organization_name }}" >> $GITHUB_ENV
 
     - name: Setup jq
