@@ -1,0 +1,51 @@
+name: 🔄 Automated Multi-Repo OIDC Mapping (OIDC - JFrog)
+description: Request to automate identity mappings for multiple repositories under the configured OIDC provider in JFrog
+title: "🔄 [Automate Multi-Repo OIDC Mapping] Request"
+labels: [ "oidc-mapping", "multi-repo" ]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ## 🔄 Request to Automate OIDC Mapping in JFrog
+
+      Fill out the following fields to automate OIDC Mapping under the OIDC provider configured in JFrog.
+
+- type: markdown
+  attributes:
+    value: |
+      ### 🔐 OIDC Provider  
+      **mgmri-enterprise-oidc**  
+
+- type: textarea
+  id: repositories
+  attributes:
+    label: 📦 Repository Names
+    description: List all repository names (one per line) for which OIDC mapping should be updated.
+    placeholder: |
+      your-repository-1
+      your-repository-2
+      your-repository-3
+  validations:
+      required: true
+
+- type: dropdown
+  id: organization_name
+  attributes:
+    label: 🏢 Organization Name
+    description: Please select the organization name for the identity mapping.
+    options:
+    - mgmri-commerce
+    - mgmri-dge
+    - mgmri-source
+    - mgmri-ciam
+    - mgmri-core
+    - mgmri-corp
+    - mgmri-data
+    - mgmri-eiam
+    - mgmri-entertainment
+    - mgmri-gaming
+    - mgmri-hotel
+    - mgmri-secops
+    - mgmri-shared
+  validations:
+    required: true
