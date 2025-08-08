@@ -2,7 +2,7 @@ name: Clone Azure DevOps Repo
 
 on:
     push:
-      branches: ['nuget_version_upgrade_automate']
+      branches: ['py_version_upgrade']
     workflow_dispatch:
 
 jobs:
