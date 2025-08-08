@@ -21,7 +21,7 @@ jobs:
           # === CONFIGURE YOUR ADO PROJECT/REPO DETAILS HERE ===
           ADO_ORG="prashantkum26"
           ADO_PROJECT="MyTestProject"    # Change to your actual project name
-          ADO_REPO="MyRepo"              # Change to your actual repo name
+          ADO_REPO="TestRepo1"              # Change to your actual repo name
 
           # Create authenticated URL
           ADO_URL="https://${ADO_PAT}@dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_git/${ADO_REPO}"
