@@ -20,7 +20,7 @@ jobs:
         run: |
           # === CONFIGURE YOUR ADO PROJECT/REPO DETAILS HERE ===
           ADO_ORG="prashantkum26"
-          ADO_PROJECT="MyTestProject"    # Change to your actual project name
+          ADO_PROJECT="MyTestProject1"    # Change to your actual project name
           ADO_REPO="TestRepo1"              # Change to your actual repo name
 
           # Create authenticated URL
