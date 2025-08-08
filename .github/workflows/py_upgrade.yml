@@ -4,8 +4,6 @@ on:
     branches: ['py_version_upgrade']
 
     paths-ignore:
-      # When the below folders are checked-in, the GitHub Actions job will not start.
-      #  - '.github/**'
       - '.jfrog/**'
 
 env:
@@ -32,13 +30,14 @@ jobs:
           echo "JF_RT_URL= ${{env.JF_RT_URL}}"
           echo "JFROG_CLI_LOG_LEVEL= ${{env.JFROG_CLI_LOG_LEVEL}}"
           echo "OIDC_PROVIDER_NAME= ${{env.OIDC_PROVIDER_NAME}}"
-
+          
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           lfs: true
+          ref: py_version_upgrade
          
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
@@ -75,16 +74,18 @@ jobs:
               echo "❌ requirements.txt not found!"
               exit 1
             fi
-        
+
+            # Read each vulnerable package and update if needed
             jq -c '.[0].violations[]
               | select(.severity == "High" or .severity == "Critical")
+              | select(.components != null)
               | .components
               | to_entries[]
               | select(.key | test("^pypi://[^:]+:[^:]+$"))
               | {
                   package: (.key | sub("^pypi://"; "") | split(":")[0]),
                   version: (.key | split(":")[1] | gsub("\\[|\\]"; "")),
-                  fixed_versions: (.value.fixed_versions | map(gsub("\\[|\\]"; "")))
+                  fixed_versions: (.value.fixed_versions // [] | map(gsub("\\[|\\]"; "")))
                 }' "$INPUT_FILE" | while read -r pkg; do
         
               PACKAGE=$(echo "$pkg" | jq -r '.package')
