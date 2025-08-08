@@ -1,7 +1,9 @@
 name: Clone Azure DevOps Repo
 
 on:
-  workflow_dispatch:
+    push:
+      branches: ['nuget_version_upgrade_automate']
+    workflow_dispatch:
 
 jobs:
   clone-ado:
