@@ -1,0 +1,31 @@
+name: Clone Azure DevOps Repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone-ado:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout current GitHub repo (optional, for workspace context)
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v4
+
+      # Clone Azure DevOps repo
+      - name: Clone ADO Repository
+        env:
+          ADO_PAT: ${{ secrets.ADO_PAT }}
+        run: |
+          # === CONFIGURE YOUR ADO PROJECT/REPO DETAILS HERE ===
+          ADO_ORG="prashantkum26"
+          ADO_PROJECT="MyTestProject"    # Change to your actual project name
+          ADO_REPO="MyRepo"              # Change to your actual repo name
+
+          # Create authenticated URL
+          ADO_URL="https://${ADO_PAT}@dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_git/${ADO_REPO}"
+
+          echo "Cloning from $ADO_ORG/$ADO_PROJECT/$ADO_REPO..."
+          git clone "$ADO_URL" ado-repo
+
+          echo "Listing files in ado-repo:"
+          ls -la ado-repo

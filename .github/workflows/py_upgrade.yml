@@ -1,4 +1,4 @@
-name: JFrog Audit Dotnet
+name: JFrog Audit Python
 on:
   push:
     branches: ['py_version_upgrade']
@@ -10,11 +10,8 @@ on:
 
 env:
   JF_RT_URL: https://mgmresorts.jfrog.io
-  RT_REPO_VIRTUAL: 'dge-consume-packages-nuget-dev-virtual'
   JFROG_CLI_LOG_LEVEL: 'Error' # DEBUG, INFO, WARN, ERROR
   OIDC_PROVIDER_NAME: 'test-exploration-oidc'
-  JF_PROJECT: 'dge'
-  DOTNET_VERSION: '9.0'                     
 
 permissions:
   actions: read # for detecting the Github Actions environment.
@@ -33,20 +30,15 @@ jobs:
       - name: Print ENV Vars
         run: |-
           echo "JF_RT_URL= ${{env.JF_RT_URL}}"
-          echo "RT_REPO_VIRTUAL= ${{env.RT_REPO_VIRTUAL}}"
           echo "JFROG_CLI_LOG_LEVEL= ${{env.JFROG_CLI_LOG_LEVEL}}"
           echo "OIDC_PROVIDER_NAME= ${{env.OIDC_PROVIDER_NAME}}"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           lfs: true
-    
-    #   - name: Dotnet setup
-    #     uses: actions/setup-dotnet@v4
-    #     with:
-    #         dotnet-version: ${{env.DOTNET_VERSION}}
          
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
@@ -58,17 +50,6 @@ jobs:
         env:
           JF_URL: ${{ env.JF_RT_URL }}
           JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    #   - name: Add Nuget Sources & Set OIDC Token as env variable JFROG_TOKEN
-    #     if: true
-    #     run: |
-    #       echo JFROG_TOKEN=${{ steps.setup-cli.outputs.oidc-token }} >> $GITHUB_ENV
-    #       dotnet nuget add source https://mgmresorts.jfrog.io/artifactory/api/nuget/v3/${{env.RT_REPO_VIRTUAL}}/index.json -n Artifactory -u arana@mgmresorts.com -p ${{ secrets.JF_TOKEN }} --store-password-in-clear-text
-            
-
-    #   - name: Configure the project's repositories
-    #     run: |
-    #         jf dotnet-config --repo-resolve='${{ env.RT_REPO_VIRTUAL}}'
           
       - name: Xray Audit
         continue-on-error: true
@@ -134,8 +115,6 @@ jobs:
               fi
             done
         
-        
-  
       - name: Upload fixed requirements.txt
         uses: actions/upload-artifact@v4
         with:
