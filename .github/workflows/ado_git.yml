@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GH_PAT: ${{ secrets.GH_PAT }}
+      GH_PAT: ${{ secrets.PAT }}
       ADO_PAT: ${{ secrets.ADO_PAT }}
       ADO_ORG: "prashantkum26"
       ADO_TEAM_PROJECT: "MyTestProject1"
