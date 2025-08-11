@@ -33,6 +33,8 @@ jobs:
         gh --version
 
     - name: Install ADO2GH CLI Extension
+      env:
+        GH_TOKEN: ${{ env.GITHUB_TOKEN }}
       run: |
         gh extension install github/gh-ado2gh
         gh ado2gh --help
