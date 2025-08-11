@@ -34,7 +34,7 @@ jobs:
 
     - name: Install ADO2GH CLI Extension
       env:
-        GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
         gh extension install github/gh-ado2gh
         gh ado2gh --help
