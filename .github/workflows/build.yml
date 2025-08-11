@@ -3,8 +3,8 @@ name: Build and Test
 on:
   push:
     branches:
-      - 'SSDLC-mgm_analytics'
-      - 'main'
+      - 'SSDLC-mgm_analytics_na'
+      - 'main_na'
   workflow_dispatch:
 
 permissions:
