@@ -16,11 +16,11 @@ jobs:
     env:
       GH_PAT: ${{ secrets.GH_PAT }}
       ADO_PAT: ${{ secrets.ADO_PAT }}
-      ADO_ORG: "MGMResortsDigitalEngineering"
-      ADO_TEAM_PROJECT: "EDH-TDMIG"
-      ADO_REPO: "EDHUW-CALLCENTER-DABS"
+      ADO_ORG: "prashantkum26"
+      ADO_TEAM_PROJECT: "MyTestProject1"
+      ADO_REPO: "TestRepo1"
       GITHUB_ORG: "test-git-actions"
-      GITHUB_REPO: "EDHUW-CALLCENTER-DABS"
+      GITHUB_REPO: "TestRepo1"
 
     steps:
     - name: Checkout repository (optional)
